@@ -1,0 +1,851 @@
+{
+ "features": [
+  {
+   "ID": "FR-001",
+   "Modul": "WhatsApp",
+   "Fitur": "Integrasi Cloud API",
+   "Deskripsi kebutuhan": "Menghubungkan satu nomor WhatsApp Business pusat ke sistem melalui Meta WhatsApp Cloud API.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 7",
+   "Kriteria selesai / catatan": "Webhook menerima pesan dan status; pesan keluar memakai nomor pusat."
+  },
+  {
+   "ID": "FR-002",
+   "Modul": "WhatsApp",
+   "Fitur": "Webhook verification",
+   "Deskripsi kebutuhan": "Mendukung verifikasi webhook dan validasi signature request dari Meta.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 7",
+   "Kriteria selesai / catatan": "Request valid diterima; request tidak valid ditolak."
+  },
+  {
+   "ID": "FR-003",
+   "Modul": "WhatsApp",
+   "Fitur": "Inbound message",
+   "Deskripsi kebutuhan": "Menerima pesan pelanggan dan membuat/memperbarui percakapan serta kontak.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 7",
+   "Kriteria selesai / catatan": "Pesan tersimpan tanpa duplikasi."
+  },
+  {
+   "ID": "FR-004",
+   "Modul": "WhatsApp",
+   "Fitur": "Outbound message",
+   "Deskripsi kebutuhan": "Sales/admin dapat mengirim pesan melalui dashboard menggunakan nomor pusat.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 7",
+   "Kriteria selesai / catatan": "Pesan terkirim dan status delivery tercatat."
+  },
+  {
+   "ID": "FR-005",
+   "Modul": "WhatsApp",
+   "Fitur": "Aturan 24 jam",
+   "Deskripsi kebutuhan": "Free-form message dibatasi sesuai customer service window; template approved digunakan di luar window jika memenuhi ketentuan Meta.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 7",
+   "Kriteria selesai / catatan": "Sistem menolak free-form di luar window dan memberi instruksi template."
+  },
+  {
+   "ID": "FR-006",
+   "Modul": "AI Chatbot",
+   "Fitur": "Kualifikasi nama",
+   "Deskripsi kebutuhan": "AI mengumpulkan nama pelanggan secara natural.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 2",
+   "Kriteria selesai / catatan": "Nama tersimpan dan tidak ditanyakan berulang jika sudah tersedia."
+  },
+  {
+   "ID": "FR-007",
+   "Modul": "AI Chatbot",
+   "Fitur": "Kualifikasi domisili",
+   "Deskripsi kebutuhan": "AI mengumpulkan kota/kabupaten domisili pelanggan.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 2",
+   "Kriteria selesai / catatan": "Domisili tersimpan dalam field terstruktur."
+  },
+  {
+   "ID": "FR-008",
+   "Modul": "AI Chatbot",
+   "Fitur": "Kualifikasi unit",
+   "Deskripsi kebutuhan": "AI mengumpulkan model Mitsubishi yang diminati.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 2",
+   "Kriteria selesai / catatan": "Model tersimpan; mendukung daftar model yang dapat diperbarui."
+  },
+  {
+   "ID": "FR-009",
+   "Modul": "AI Chatbot",
+   "Fitur": "Nomor otomatis",
+   "Deskripsi kebutuhan": "Nomor pelanggan diambil dari WhatsApp sender ID.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 2",
+   "Kriteria selesai / catatan": "Bot tidak meminta nomor yang sudah tersedia dari WhatsApp."
+  },
+  {
+   "ID": "FR-010",
+   "Modul": "AI Chatbot",
+   "Fitur": "Handover",
+   "Deskripsi kebutuhan": "Setelah tiga field wajib lengkap, AI mengirim pesan handover lalu berhenti merespons otomatis.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 2/4",
+   "Kriteria selesai / catatan": "Tidak ada balasan AI setelah status handover sampai diaktifkan kembali sesuai aturan."
+  },
+  {
+   "ID": "FR-011",
+   "Modul": "Lead Management",
+   "Fitur": "COLD/WARM tag",
+   "Deskripsi kebutuhan": "COLD untuk belum ditugaskan ke sales; WARM untuk sudah ditugaskan ke sales.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 3",
+   "Kriteria selesai / catatan": "Status berubah hanya melalui event assignment yang sah."
+  },
+  {
+   "ID": "FR-012",
+   "Modul": "Lead Routing",
+   "Fitur": "Mapping wilayah",
+   "Deskripsi kebutuhan": "Admin dapat mengatur daftar kota/kabupaten untuk tiap sales territory.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 3/6",
+   "Kriteria selesai / catatan": "Exact mapping; tidak melakukan inferensi geografis otomatis."
+  },
+  {
+   "ID": "FR-013",
+   "Modul": "Lead Routing",
+   "Fitur": "Auto assignment",
+   "Deskripsi kebutuhan": "Leads diarahkan ke agent sesuai wilayah dan aturan kapasitas/ketersediaan.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 3",
+   "Kriteria selesai / catatan": "Assignment tercatat beserta waktu dan actor."
+  },
+  {
+   "ID": "FR-014",
+   "Modul": "Lead Routing",
+   "Fitur": "Admin Queue",
+   "Deskripsi kebutuhan": "Leads tanpa wilayah yang cocok atau tanpa agent tersedia masuk ke antrean admin dan tetap COLD.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 4",
+   "Kriteria selesai / catatan": "Admin dapat melihat, mengambil, dan menugaskan leads."
+  },
+  {
+   "ID": "FR-015",
+   "Modul": "Lead Routing",
+   "Fitur": "Manual assign/reassign",
+   "Deskripsi kebutuhan": "Admin dapat menetapkan atau memindahkan leads ke sales agent.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 4/6",
+   "Kriteria selesai / catatan": "Perubahan memiliki audit trail."
+  },
+  {
+   "ID": "FR-016",
+   "Modul": "Inbox",
+   "Fitur": "Unified inbox",
+   "Deskripsi kebutuhan": "Admin dan sales melihat percakapan sesuai hak akses.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 5",
+   "Kriteria selesai / catatan": "Sales hanya melihat leads yang diizinkan; admin sesuai role."
+  },
+  {
+   "ID": "FR-017",
+   "Modul": "Inbox",
+   "Fitur": "Conversation history",
+   "Deskripsi kebutuhan": "Seluruh riwayat pesan pelanggan dan balasan internal tersimpan berurutan.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 5",
+   "Kriteria selesai / catatan": "Riwayat dapat dibuka dari daftar leads."
+  },
+  {
+   "ID": "FR-018",
+   "Modul": "Inbox",
+   "Fitur": "Human takeover",
+   "Deskripsi kebutuhan": "Sales mengambil alih percakapan; AI tidak mengirim pesan setelah handover.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 4",
+   "Kriteria selesai / catatan": "Tidak terjadi balasan AI dan sales bersamaan."
+  },
+  {
+   "ID": "FR-019",
+   "Modul": "User Management",
+   "Fitur": "Role-based access",
+   "Deskripsi kebutuhan": "Mendukung Super Admin, Admin Pusat/Supervisor, dan Sales Agent.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 5/6",
+   "Kriteria selesai / catatan": "Endpoint dan UI memeriksa izin berdasarkan role."
+  },
+  {
+   "ID": "FR-020",
+   "Modul": "Sales Management",
+   "Fitur": "Agent availability",
+   "Deskripsi kebutuhan": "Admin mengatur ketersediaan dan kapasitas agent.",
+   "Prioritas": "Should have",
+   "Tahap target": "Phase 3/6",
+   "Kriteria selesai / catatan": "Routing menghormati konfigurasi availability/capacity."
+  },
+  {
+   "ID": "FR-021",
+   "Modul": "Dashboard",
+   "Fitur": "KPI overview",
+   "Deskripsi kebutuhan": "Menampilkan total leads, COLD, WARM, Admin Queue, dan workload sales.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 6",
+   "Kriteria selesai / catatan": "Angka konsisten dengan data leads dan assignment."
+  },
+  {
+   "ID": "FR-022",
+   "Modul": "Dashboard",
+   "Fitur": "Lead table",
+   "Deskripsi kebutuhan": "Menampilkan daftar leads, sumber, domisili, unit, status, dan agent.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 6",
+   "Kriteria selesai / catatan": "Mendukung pencarian/filter dasar."
+  },
+  {
+   "ID": "FR-023",
+   "Modul": "Reporting",
+   "Fitur": "Laporan sumber leads",
+   "Deskripsi kebutuhan": "Mengelompokkan leads berdasarkan Meta Ads, Google Ads, Google Organic, dan WhatsApp organik.",
+   "Prioritas": "Should have",
+   "Tahap target": "Phase 6",
+   "Kriteria selesai / catatan": "Sumber tidak diketahui ditandai Unknown, bukan ditebak."
+  },
+  {
+   "ID": "FR-024",
+   "Modul": "Reporting",
+   "Fitur": "Laporan sales",
+   "Deskripsi kebutuhan": "Menampilkan volume assignment, status, dan aktivitas per agent.",
+   "Prioritas": "Should have",
+   "Tahap target": "Phase 6",
+   "Kriteria selesai / catatan": "Definisi metrik disepakati sebelum produksi."
+  },
+  {
+   "ID": "FR-025",
+   "Modul": "Meta Integration",
+   "Fitur": "Conversions API",
+   "Deskripsi kebutuhan": "Mengirim event kualitas leads yang memenuhi syarat ke endpoint Meta yang sesuai.",
+   "Prioritas": "Should have",
+   "Tahap target": "Tahap integrasi lanjutan",
+   "Kriteria selesai / catatan": "Validasi event, consent, deduplication, dan eligibility Meta."
+  },
+  {
+   "ID": "FR-026",
+   "Modul": "Simulator",
+   "Fitur": "Dummy lead/chat",
+   "Deskripsi kebutuhan": "Menguji alur tanpa nomor WhatsApp aktif melalui simulator internal.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 5",
+   "Kriteria selesai / catatan": "Bisa membuat kontak dan pesan dummy tanpa mengirim pesan eksternal."
+  },
+  {
+   "ID": "FR-027",
+   "Modul": "Audit",
+   "Fitur": "Activity log",
+   "Deskripsi kebutuhan": "Mencatat login penting, assignment, perubahan role, perubahan territory, dan tindakan admin.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 3/6",
+   "Kriteria selesai / catatan": "Log mencakup actor, action, target, timestamp."
+  },
+  {
+   "ID": "NFR-001",
+   "Modul": "Keamanan",
+   "Fitur": "Secret management",
+   "Deskripsi kebutuhan": "Token API dan secret disimpan di environment/secret manager, tidak di source code.",
+   "Prioritas": "Must have",
+   "Tahap target": "Semua tahap",
+   "Kriteria selesai / catatan": "Secret tidak muncul di log, UI, atau repository."
+  },
+  {
+   "ID": "NFR-002",
+   "Modul": "Keamanan",
+   "Fitur": "HTTPS & access control",
+   "Deskripsi kebutuhan": "Semua akses produksi memakai HTTPS dan autentikasi/otorisasi yang benar.",
+   "Prioritas": "Must have",
+   "Tahap target": "Sebelum produksi",
+   "Kriteria selesai / catatan": "Uji akses lintas role."
+  },
+  {
+   "ID": "NFR-003",
+   "Modul": "Keandalan",
+   "Fitur": "Deduplication & retry",
+   "Deskripsi kebutuhan": "Webhook diproses idempotently; kegagalan sementara dapat di-retry dengan aman.",
+   "Prioritas": "Must have",
+   "Tahap target": "Phase 7",
+   "Kriteria selesai / catatan": "Event yang sama tidak membuat pesan/lead ganda."
+  },
+  {
+   "ID": "NFR-004",
+   "Modul": "Privasi",
+   "Fitur": "Data retention",
+   "Deskripsi kebutuhan": "Aturan retensi, penghapusan, ekspor, dan akses data pelanggan ditetapkan bersama DIPO.",
+   "Prioritas": "Must have",
+   "Tahap target": "Sebelum produksi",
+   "Kriteria selesai / catatan": "Kebijakan tertulis dan disetujui."
+  },
+  {
+   "ID": "NFR-005",
+   "Modul": "Monitoring",
+   "Fitur": "Error & integration logs",
+   "Deskripsi kebutuhan": "Ada log teknis dan monitoring integrasi WhatsApp/AI/Meta.",
+   "Prioritas": "Should have",
+   "Tahap target": "Tahap produksi",
+   "Kriteria selesai / catatan": "Admin dapat mengetahui integrasi gagal tanpa melihat secret."
+  }
+ ],
+ "roadmap": [
+  {
+   "Phase": "Phase 1",
+   "Nama tahap": "Discovery & perencanaan",
+   "Ruang lingkup utama": "Workshop proses bisnis; definisi role; aturan COLD/WARM; daftar sumber; alur AI; definisi metrik; pemetaan risiko; persetujuan scope.",
+   "Estimasi durasi": "1–2 minggu",
+   "Prioritas": "Kritis",
+   "Output / deliverable": "BRD/PRD, flow proses, daftar kebutuhan, keputusan bisnis.",
+   "Gate / syarat lanjut": "Scope dan pemilik proses disetujui DIPO."
+  },
+  {
+   "Phase": "Phase 2",
+   "Nama tahap": "Fondasi backend & AI",
+   "Ruang lingkup utama": "Arsitektur aplikasi; database; autentikasi; manajemen kontak/leads/conversations; AI qualification prompt; penyimpanan field terstruktur; simulator dasar.",
+   "Estimasi durasi": "2–3 minggu",
+   "Prioritas": "Kritis",
+   "Output / deliverable": "Backend API, skema database, AI qualification flow, unit tests.",
+   "Gate / syarat lanjut": "Kualifikasi tiga field dan handover lulus skenario uji."
+  },
+  {
+   "Phase": "Phase 3",
+   "Nama tahap": "Lead routing",
+   "Ruang lingkup utama": "Territory mapping; exact city matching; agent availability/capacity; auto assignment; round-robin/prioritas bila disepakati; audit assignment; COLD/WARM.",
+   "Estimasi durasi": "1–2 minggu",
+   "Prioritas": "Kritis",
+   "Output / deliverable": "Routing engine dan konfigurasi lima wilayah.",
+   "Gate / syarat lanjut": "Seluruh skenario wilayah cocok/tidak cocok/agent unavailable lulus."
+  },
+  {
+   "Phase": "Phase 4",
+   "Nama tahap": "Admin Queue & human handover",
+   "Ruang lingkup utama": "Admin Queue; claim/assign/reassign; AI stop after handover; riwayat percakapan; aturan takeover dan audit.",
+   "Estimasi durasi": "1–2 minggu",
+   "Prioritas": "Kritis",
+   "Output / deliverable": "Admin workflow dan human handover.",
+   "Gate / syarat lanjut": "Admin dapat menangani lead; tidak ada AI/sales reply collision."
+  },
+  {
+   "Phase": "Phase 5",
+   "Nama tahap": "Frontend & unified inbox",
+   "Ruang lingkup utama": "Login; role-based UI; inbox; detail percakapan; reply; simulator inbound; polling/realtime strategy; error state.",
+   "Estimasi durasi": "2–3 minggu",
+   "Prioritas": "Tinggi",
+   "Output / deliverable": "Web dashboard awal untuk admin dan sales.",
+   "Gate / syarat lanjut": "Uji role dan percakapan end-to-end dengan data dummy."
+  },
+  {
+   "Phase": "Phase 6",
+   "Nama tahap": "Dashboard & reporting",
+   "Ruang lingkup utama": "KPI; tabel leads; filter; workload; sales management; territory UI; source reporting; export bila dibutuhkan.",
+   "Estimasi durasi": "1–2 minggu",
+   "Prioritas": "Tinggi",
+   "Output / deliverable": "Dashboard operasional dan laporan.",
+   "Gate / syarat lanjut": "Angka dashboard tervalidasi terhadap database."
+  },
+  {
+   "Phase": "Phase 7",
+   "Nama tahap": "Integrasi WhatsApp Cloud API",
+   "Ruang lingkup utama": "Meta app; webhook HTTPS; verification/signature; inbound/outbound; message status; deduplication; template; media; 24-hour window; observability.",
+   "Estimasi durasi": "2–4 minggu",
+   "Prioritas": "Kritis sebelum go-live",
+   "Output / deliverable": "Integrasi WhatsApp siap produksi dan runbook.",
+   "Gate / syarat lanjut": "Nomor resmi, kredensial, webhook, template, dan UAT Meta siap."
+  },
+  {
+   "Phase": "Phase 8",
+   "Nama tahap": "Meta CAPI & optimasi",
+   "Ruang lingkup utama": "Validasi jalur API yang didukung; event mapping; consent; deduplication; test events; monitoring; evaluasi kualitas lead.",
+   "Estimasi durasi": "1–2 minggu",
+   "Prioritas": "Lanjutan",
+   "Output / deliverable": "Event kualitas lead dan laporan integrasi.",
+   "Gate / syarat lanjut": "Dokumentasi Meta dan legal/privacy review disetujui."
+  },
+  {
+   "Phase": "Phase 9",
+   "Nama tahap": "UAT, keamanan & go-live",
+   "Ruang lingkup utama": "UAT admin/sales; load/security checks; backup/restore; monitoring; SOP; training; pilot; rollback plan; go-live bertahap.",
+   "Estimasi durasi": "1–2 minggu",
+   "Prioritas": "Kritis sebelum go-live",
+   "Output / deliverable": "Sistem produksi, SOP, training, checklist sign-off.",
+   "Gate / syarat lanjut": "Persetujuan pemilik bisnis, IT, dan operasional."
+  }
+ ],
+ "timeline": [
+  {
+   "Phase": "Phase 1",
+   "Aktivitas": "Discovery & scope",
+   "Mulai rencana": "",
+   "Selesai rencana": "",
+   "PIC": "Project Owner",
+   "Dependensi / catatan": "Validasi proses dan kebutuhan DIPO",
+   "Status": "Belum mulai"
+  },
+  {
+   "Phase": "Phase 2",
+   "Aktivitas": "Backend & AI qualification",
+   "Mulai rencana": "",
+   "Selesai rencana": "",
+   "PIC": "Developer",
+   "Dependensi / catatan": "Hasil Phase 1 disetujui",
+   "Status": "Belum mulai"
+  },
+  {
+   "Phase": "Phase 3",
+   "Aktivitas": "Lead routing",
+   "Mulai rencana": "",
+   "Selesai rencana": "",
+   "PIC": "Developer + Admin",
+   "Dependensi / catatan": "Daftar mapping wilayah dan sales tersedia",
+   "Status": "Belum mulai"
+  },
+  {
+   "Phase": "Phase 4",
+   "Aktivitas": "Admin Queue & handover",
+   "Mulai rencana": "",
+   "Selesai rencana": "",
+   "PIC": "Developer + Admin",
+   "Dependensi / catatan": "Aturan assignment disepakati",
+   "Status": "Belum mulai"
+  },
+  {
+   "Phase": "Phase 5",
+   "Aktivitas": "Frontend & inbox",
+   "Mulai rencana": "",
+   "Selesai rencana": "",
+   "PIC": "Developer",
+   "Dependensi / catatan": "API dan role model stabil",
+   "Status": "Belum mulai"
+  },
+  {
+   "Phase": "Phase 6",
+   "Aktivitas": "Dashboard & reporting",
+   "Mulai rencana": "",
+   "Selesai rencana": "",
+   "PIC": "Developer + Marketing",
+   "Dependensi / catatan": "Definisi KPI dan sumber data disepakati",
+   "Status": "Belum mulai"
+  },
+  {
+   "Phase": "Phase 7",
+   "Aktivitas": "WhatsApp Cloud API",
+   "Mulai rencana": "",
+   "Selesai rencana": "",
+   "PIC": "Developer + Meta Admin",
+   "Dependensi / catatan": "Nomor resmi, Meta app, token, webhook HTTPS",
+   "Status": "Belum mulai"
+  },
+  {
+   "Phase": "Phase 8",
+   "Aktivitas": "Meta CAPI",
+   "Mulai rencana": "",
+   "Selesai rencana": "",
+   "PIC": "Developer + Marketing",
+   "Dependensi / catatan": "Event mapping dan persyaratan Meta tervalidasi",
+   "Status": "Belum mulai"
+  },
+  {
+   "Phase": "Phase 9",
+   "Aktivitas": "UAT & go-live",
+   "Mulai rencana": "",
+   "Selesai rencana": "",
+   "PIC": "Project Owner + User",
+   "Dependensi / catatan": "UAT, security review, SOP, approval",
+   "Status": "Belum mulai"
+  }
+ ],
+ "cost": [
+  {
+   "Komponen": "WhatsApp Cloud API",
+   "Dasar perhitungan": "Biaya pesan sesuai kategori, negara, dan ketentuan Meta yang berlaku.",
+   "Biaya awal (Rp)": "",
+   "Biaya bulanan (Rp)": "",
+   "Biaya variabel": "Per penggunaan",
+   "Catatan / sumber angka": "Cek pricing resmi Meta sebelum estimasi."
+  },
+  {
+   "Komponen": "AI API",
+   "Dasar perhitungan": "Token input/output, model, dan volume percakapan.",
+   "Biaya awal (Rp)": "",
+   "Biaya bulanan (Rp)": "",
+   "Biaya variabel": "Per penggunaan",
+   "Catatan / sumber angka": "Claude Pro bukan saldo API; API key dan billing terpisah."
+  },
+  {
+   "Komponen": "Backend hosting",
+   "Dasar perhitungan": "Compute untuk API, worker, webhook, dan scheduler.",
+   "Biaya awal (Rp)": "",
+   "Biaya bulanan (Rp)": "",
+   "Biaya variabel": "Tetap / bertingkat",
+   "Catatan / sumber angka": "Pilih kapasitas sesuai traffic dan SLA."
+  },
+  {
+   "Komponen": "Frontend hosting",
+   "Dasar perhitungan": "Hosting aplikasi web Next.js.",
+   "Biaya awal (Rp)": "",
+   "Biaya bulanan (Rp)": "",
+   "Biaya variabel": "Tetap / bertingkat",
+   "Catatan / sumber angka": "Periksa batas build, bandwidth, dan server runtime."
+  },
+  {
+   "Komponen": "Database",
+   "Dasar perhitungan": "PostgreSQL managed/self-hosted, storage, backup.",
+   "Biaya awal (Rp)": "",
+   "Biaya bulanan (Rp)": "",
+   "Biaya variabel": "Tetap / bertingkat",
+   "Catatan / sumber angka": "Termasuk backup dan monitoring."
+  },
+  {
+   "Komponen": "Domain & DNS",
+   "Dasar perhitungan": "Domain aplikasi dan pengelolaan DNS.",
+   "Biaya awal (Rp)": "",
+   "Biaya bulanan (Rp)": "",
+   "Biaya variabel": "Tahunan",
+   "Catatan / sumber angka": "Opsional bila memakai domain yang sudah dimiliki."
+  },
+  {
+   "Komponen": "Storage media",
+   "Dasar perhitungan": "Penyimpanan file/media jika diperlukan.",
+   "Biaya awal (Rp)": "",
+   "Biaya bulanan (Rp)": "",
+   "Biaya variabel": "Per GB / transfer",
+   "Catatan / sumber angka": "Perhatikan kebijakan retensi dan privasi."
+  },
+  {
+   "Komponen": "Monitoring & logging",
+   "Dasar perhitungan": "Error tracking, uptime monitoring, log retention.",
+   "Biaya awal (Rp)": "",
+   "Biaya bulanan (Rp)": "",
+   "Biaya variabel": "Tetap / bertingkat",
+   "Catatan / sumber angka": "Hindari mencatat token dan isi sensitif."
+  },
+  {
+   "Komponen": "Maintenance",
+   "Dasar perhitungan": "Bug fix, update dependency, backup test, support.",
+   "Biaya awal (Rp)": "",
+   "Biaya bulanan (Rp)": "",
+   "Biaya variabel": "Bulanan",
+   "Catatan / sumber angka": "Bisa internal atau kontrak vendor."
+  },
+  {
+   "Komponen": "Keamanan & audit",
+   "Dasar perhitungan": "Security review, penetration test, hardening.",
+   "Biaya awal (Rp)": "",
+   "Biaya bulanan (Rp)": "",
+   "Biaya variabel": "Per proyek / berkala",
+   "Catatan / sumber angka": "Disarankan sebelum go-live."
+  }
+ ],
+ "roles": [
+  {
+   "Fitur / aktivitas": "Melihat seluruh leads",
+   "Super Admin": "Ya",
+   "Admin Pusat / Supervisor": "Ya",
+   "Sales Agent": "Tidak",
+   "Catatan": "Sales hanya melihat leads yang ditugaskan/diizinkan."
+  },
+  {
+   "Fitur / aktivitas": "Melihat seluruh percakapan",
+   "Super Admin": "Ya",
+   "Admin Pusat / Supervisor": "Ya",
+   "Sales Agent": "Terbatas",
+   "Catatan": "Akses percakapan sales dibatasi sesuai assignment."
+  },
+  {
+   "Fitur / aktivitas": "Membalas percakapan",
+   "Super Admin": "Ya",
+   "Admin Pusat / Supervisor": "Ya",
+   "Sales Agent": "Ya",
+   "Catatan": "Semua reply keluar melalui nomor WhatsApp pusat."
+  },
+  {
+   "Fitur / aktivitas": "Mengelola Admin Queue",
+   "Super Admin": "Ya",
+   "Admin Pusat / Supervisor": "Ya",
+   "Sales Agent": "Tidak",
+   "Catatan": "Admin dapat claim dan melakukan assignment."
+  },
+  {
+   "Fitur / aktivitas": "Assign/reassign sales",
+   "Super Admin": "Ya",
+   "Admin Pusat / Supervisor": "Ya",
+   "Sales Agent": "Tidak",
+   "Catatan": "Setiap perubahan dicatat dalam audit log."
+  },
+  {
+   "Fitur / aktivitas": "Mengelola akun pengguna",
+   "Super Admin": "Ya",
+   "Admin Pusat / Supervisor": "Terbatas",
+   "Sales Agent": "Tidak",
+   "Catatan": "Admin pusat dapat diberi hak tertentu sesuai kebijakan."
+  },
+  {
+   "Fitur / aktivitas": "Mengelola territory mapping",
+   "Super Admin": "Ya",
+   "Admin Pusat / Supervisor": "Ya (jika diizinkan)",
+   "Sales Agent": "Tidak",
+   "Catatan": "Perubahan mapping harus tercatat."
+  },
+  {
+   "Fitur / aktivitas": "Mengubah availability sales",
+   "Super Admin": "Ya",
+   "Admin Pusat / Supervisor": "Ya",
+   "Sales Agent": "Opsional: status sendiri",
+   "Catatan": "Perlu keputusan apakah sales boleh mengubah status sendiri."
+  },
+  {
+   "Fitur / aktivitas": "Melihat dashboard global",
+   "Super Admin": "Ya",
+   "Admin Pusat / Supervisor": "Ya",
+   "Sales Agent": "Tidak",
+   "Catatan": "Sales dapat memiliki dashboard pribadi jika dibutuhkan."
+  },
+  {
+   "Fitur / aktivitas": "Melihat laporan per sales",
+   "Super Admin": "Ya",
+   "Admin Pusat / Supervisor": "Ya",
+   "Sales Agent": "Terbatas",
+   "Catatan": "Batasi data lintas agent."
+  },
+  {
+   "Fitur / aktivitas": "Mengatur integrasi/token",
+   "Super Admin": "Ya",
+   "Admin Pusat / Supervisor": "Tidak",
+   "Sales Agent": "Tidak",
+   "Catatan": "Rahasia integrasi hanya untuk admin teknis berwenang."
+  }
+ ],
+ "uat": [
+  {
+   "ID": "UAT-01",
+   "Area": "AI qualification",
+   "Skenario uji": "Pelanggan mengirim pesan awal tanpa data profil.",
+   "Hasil yang diharapkan": "AI menyapa dan mulai meminta data yang belum tersedia.",
+   "Status": "Belum diuji",
+   "Catatan / bukti": ""
+  },
+  {
+   "ID": "UAT-02",
+   "Area": "AI qualification",
+   "Skenario uji": "Pelanggan menyebut nama, domisili, dan unit sekaligus.",
+   "Hasil yang diharapkan": "Sistem menyimpan ketiga field dan tidak menanyakan ulang.",
+   "Status": "Belum diuji",
+   "Catatan / bukti": ""
+  },
+  {
+   "ID": "UAT-03",
+   "Area": "AI qualification",
+   "Skenario uji": "Pelanggan hanya memberi dua dari tiga data.",
+   "Hasil yang diharapkan": "AI hanya menanyakan field yang belum lengkap.",
+   "Status": "Belum diuji",
+   "Catatan / bukti": ""
+  },
+  {
+   "ID": "UAT-04",
+   "Area": "Handover",
+   "Skenario uji": "Semua field wajib sudah lengkap.",
+   "Hasil yang diharapkan": "AI mengirim pesan handover dan menghentikan auto-reply.",
+   "Status": "Belum diuji",
+   "Catatan / bukti": ""
+  },
+  {
+   "ID": "UAT-05",
+   "Area": "Routing",
+   "Skenario uji": "Domisili tepat cocok dengan mapping agent yang aktif.",
+   "Hasil yang diharapkan": "Lead ditugaskan ke agent sesuai mapping dan menjadi WARM.",
+   "Status": "Belum diuji",
+   "Catatan / bukti": ""
+  },
+  {
+   "ID": "UAT-06",
+   "Area": "Routing",
+   "Skenario uji": "Domisili tidak ada di mapping.",
+   "Hasil yang diharapkan": "Lead masuk Admin Queue dan tetap COLD.",
+   "Status": "Belum diuji",
+   "Catatan / bukti": ""
+  },
+  {
+   "ID": "UAT-07",
+   "Area": "Routing",
+   "Skenario uji": "Agent wilayah tidak tersedia/kapasitas penuh.",
+   "Hasil yang diharapkan": "Lead mengikuti fallback yang ditentukan, default Admin Queue.",
+   "Status": "Belum diuji",
+   "Catatan / bukti": ""
+  },
+  {
+   "ID": "UAT-08",
+   "Area": "Assignment",
+   "Skenario uji": "Admin menugaskan lead COLD ke sales.",
+   "Hasil yang diharapkan": "Lead menjadi WARM dan assignment history tercatat.",
+   "Status": "Belum diuji",
+   "Catatan / bukti": ""
+  },
+  {
+   "ID": "UAT-09",
+   "Area": "Inbox",
+   "Skenario uji": "Sales membuka percakapan yang ditugaskan.",
+   "Hasil yang diharapkan": "Sales dapat melihat riwayat percakapan lengkap.",
+   "Status": "Belum diuji",
+   "Catatan / bukti": ""
+  },
+  {
+   "ID": "UAT-10",
+   "Area": "Inbox",
+   "Skenario uji": "Sales membalas dari dashboard.",
+   "Hasil yang diharapkan": "Pesan dikirim melalui nomor pusat dan statusnya tercatat.",
+   "Status": "Belum diuji",
+   "Catatan / bukti": ""
+  },
+  {
+   "ID": "UAT-11",
+   "Area": "AI safety",
+   "Skenario uji": "Sales mengambil alih percakapan.",
+   "Hasil yang diharapkan": "AI tidak mengirim balasan otomatis setelah takeover.",
+   "Status": "Belum diuji",
+   "Catatan / bukti": ""
+  },
+  {
+   "ID": "UAT-12",
+   "Area": "WhatsApp",
+   "Skenario uji": "Webhook menerima event yang sama lebih dari sekali.",
+   "Hasil yang diharapkan": "Tidak terjadi duplikasi pesan atau leads.",
+   "Status": "Belum diuji",
+   "Catatan / bukti": ""
+  },
+  {
+   "ID": "UAT-13",
+   "Area": "WhatsApp",
+   "Skenario uji": "Pesan free-form dikirim di luar 24-hour customer service window.",
+   "Hasil yang diharapkan": "Sistem memblokir dan mengarahkan penggunaan approved template.",
+   "Status": "Belum diuji",
+   "Catatan / bukti": ""
+  },
+  {
+   "ID": "UAT-14",
+   "Area": "Security",
+   "Skenario uji": "Sales mencoba membuka leads agent lain.",
+   "Hasil yang diharapkan": "Akses ditolak sesuai role/assignment policy.",
+   "Status": "Belum diuji",
+   "Catatan / bukti": ""
+  },
+  {
+   "ID": "UAT-15",
+   "Area": "Dashboard",
+   "Skenario uji": "Bandingkan KPI dashboard dengan data database.",
+   "Hasil yang diharapkan": "Angka total dan status sesuai definisi metrik.",
+   "Status": "Belum diuji",
+   "Catatan / bukti": ""
+  },
+  {
+   "ID": "UAT-16",
+   "Area": "Source tracking",
+   "Skenario uji": "Lead berasal dari CTWA dengan referral tersedia.",
+   "Hasil yang diharapkan": "Source/campaign metadata tersimpan sesuai data yang diterima.",
+   "Status": "Belum diuji",
+   "Catatan / bukti": ""
+  },
+  {
+   "ID": "UAT-17",
+   "Area": "Meta integration",
+   "Skenario uji": "Kirim event test ke endpoint Meta yang disetujui.",
+   "Hasil yang diharapkan": "Event diterima dan tercatat; tidak mengirim data yang tidak diizinkan.",
+   "Status": "Belum diuji",
+   "Catatan / bukti": ""
+  },
+  {
+   "ID": "UAT-18",
+   "Area": "Recovery",
+   "Skenario uji": "Simulasikan gangguan API sementara.",
+   "Hasil yang diharapkan": "Sistem mencatat kegagalan dan retry aman tanpa duplikasi.",
+   "Status": "Belum diuji",
+   "Catatan / bukti": ""
+  }
+ ],
+ "risks": [
+  {
+   "ID": "R-01",
+   "Risiko / dependensi": "Nomor WhatsApp dan kepemilikan Business Manager",
+   "Dampak potensial": "Integrasi produksi tidak dapat diuji/diaktifkan.",
+   "Mitigasi / tindakan": "Pastikan pemilik nomor, Business Portfolio, WABA, akses admin, dan proses verifikasi.",
+   "Prioritas": "Kritis"
+  },
+  {
+   "ID": "R-02",
+   "Risiko / dependensi": "Akses Meta App dan webhook HTTPS",
+   "Dampak potensial": "Webhook tidak dapat menerima event dari Meta.",
+   "Mitigasi / tindakan": "Siapkan Meta Developer App, konfigurasi webhook publik HTTPS, verify token, dan app secret.",
+   "Prioritas": "Kritis"
+  },
+  {
+   "ID": "R-03",
+   "Risiko / dependensi": "Pemetaan wilayah belum lengkap",
+   "Dampak potensial": "Leads salah dialokasikan atau tertahan di queue.",
+   "Mitigasi / tindakan": "Dapatkan daftar kota/kabupaten resmi per agent dan pemilik approval mapping.",
+   "Prioritas": "Kritis"
+  },
+  {
+   "ID": "R-04",
+   "Risiko / dependensi": "Kebijakan kapasitas sales belum disepakati",
+   "Dampak potensial": "Distribusi tidak adil atau agent overload.",
+   "Mitigasi / tindakan": "Tetapkan kapasitas, availability, prioritas, round-robin, dan fallback.",
+   "Prioritas": "Tinggi"
+  },
+  {
+   "ID": "R-05",
+   "Risiko / dependensi": "Sumber leads tidak selalu terbaca",
+   "Dampak potensial": "Laporan atribusi tidak akurat.",
+   "Mitigasi / tindakan": "Simpan metadata yang tersedia; gunakan Unknown bila sumber tidak dapat dibuktikan; buat UTM/link standar.",
+   "Prioritas": "Tinggi"
+  },
+  {
+   "ID": "R-06",
+   "Risiko / dependensi": "Perubahan kebijakan/harga API Meta",
+   "Dampak potensial": "Biaya dan implementasi dapat berubah.",
+   "Mitigasi / tindakan": "Verifikasi dokumentasi, pricing, dan eligibility Meta sebelum implementasi serta berkala.",
+   "Prioritas": "Tinggi"
+  },
+  {
+   "ID": "R-07",
+   "Risiko / dependensi": "Biaya AI API tidak terkontrol",
+   "Dampak potensial": "Biaya operasional meningkat.",
+   "Mitigasi / tindakan": "Batasi token, gunakan model sesuai kebutuhan, cache data, logging pemakaian, dan budget alert.",
+   "Prioritas": "Tinggi"
+  },
+  {
+   "ID": "R-08",
+   "Risiko / dependensi": "AI salah memahami data pelanggan",
+   "Dampak potensial": "Salah routing atau pengalaman pelanggan buruk.",
+   "Mitigasi / tindakan": "Validasi field, konfirmasi domisili/unit bila ambigu, fallback ke admin, dan uji percakapan.",
+   "Prioritas": "Tinggi"
+  },
+  {
+   "ID": "R-09",
+   "Risiko / dependensi": "Data pribadi pelanggan",
+   "Dampak potensial": "Risiko privasi, kebocoran, dan ketidakpatuhan.",
+   "Mitigasi / tindakan": "Tentukan dasar pemrosesan, pemberitahuan privasi, akses minimum, retensi, dan prosedur penghapusan.",
+   "Prioritas": "Kritis"
+  },
+  {
+   "ID": "R-10",
+   "Risiko / dependensi": "Repository atau konfigurasi terekspos",
+   "Dampak potensial": "Token/API key atau data internal dapat bocor.",
+   "Mitigasi / tindakan": "Repository private, secret scanning, environment variables, rotasi secret jika terpapar.",
+   "Prioritas": "Kritis"
+  },
+  {
+   "ID": "R-11",
+   "Risiko / dependensi": "Ketergantungan pada satu nomor pusat",
+   "Dampak potensial": "Gangguan nomor menghambat semua percakapan.",
+   "Mitigasi / tindakan": "Siapkan prosedur incident, monitoring, escalation, dan rencana pemulihan.",
+   "Prioritas": "Tinggi"
+  },
+  {
+   "ID": "R-12",
+   "Risiko / dependensi": "Integrasi Meta CAPI tidak sesuai produk yang didukung",
+   "Dampak potensial": "Event tidak diterima atau tidak memberi optimasi yang diharapkan.",
+   "Mitigasi / tindakan": "Validasi jalur CRM/Business Messaging CAPI, event, consent, deduplication, dan test events.",
+   "Prioritas": "Tinggi"
+  }
+ ]
+}
