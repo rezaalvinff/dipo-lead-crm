@@ -22,6 +22,11 @@ export function extractFields(text: string, cities: string[], units: string[], e
   const all = Array.from(new Set([...KNOWN_CITIES, ...cities]));
   const city = all.sort((a, b) => b.length - a.length).find((c) => new RegExp(`\\b${c.toLowerCase()}\\b`).test(lower));
   if (city) out.city = city;
+  else {
+    // Kota yang tidak dikenal tetap ditangkap dari pola "dari X" / "di X", lalu di-route (biasanya ke Admin Queue).
+    const m = t.match(/\b(?:dari|di|domisili|tinggal di|daerah)\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)?)/);
+    if (m && !/^(Mitsubishi|DIPO)\b/.test(m[1]) && !units.some((u) => m[1].toLowerCase().includes(u.toLowerCase()))) out.city = m[1];
+  }
   const unit = [...units].sort((a, b) => b.length - a.length).find((u) => lower.includes(u.toLowerCase()));
   if (unit) out.unit = unit;
   else if (/belum tahu|blm tau|belum tau|bingung/.test(lower)) out.unit = "Belum tahu";

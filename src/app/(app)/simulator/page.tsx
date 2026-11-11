@@ -12,7 +12,7 @@ const randPhone = () => `+62 81${Math.floor(Math.random() * 9)} ${Math.floor(100
 const SCENARIOS = [
   { label: "Data lengkap sekaligus → WARM", text: "Halo, nama saya Andi Wijaya dari Medan, mau tanya Pajero Sport" },
   { label: "Domisili Karawang → agent Jakarta", text: "Saya Bambang dari Karawang, minat Xforce" },
-  { label: "Di luar wilayah → Admin Queue", text: "Saya Rina dari Bandung, minat Xpander" },
+  { label: "Di luar wilayah → Admin", text: "Saya Rina dari Cikarang, minat Xpander" },
   { label: "Tanya promo (knowledge)", text: "Halo kak, ada promo apa bulan ini?" },
   { label: "Tanya kredit (knowledge)", text: "Bisa kredit gak? DP berapa?" },
 ];
