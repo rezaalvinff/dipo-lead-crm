@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   LayoutDashboard, Users, MessageSquare, Inbox, UserCog, FlaskConical, BarChart3, BookOpen,
-  ScrollText, KeyRound, ClipboardList, Menu, X, LogOut, RotateCcw,
+  ScrollText, KeyRound, Menu, X, LogOut, RotateCcw,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { ROLE_LABEL } from "@/lib/permissions";
@@ -22,11 +22,10 @@ const NAV: { href: string; label: string; icon: React.ElementType; agent?: boole
   { href: "/reports", label: "Laporan", icon: BarChart3 },
   { href: "/audit", label: "Audit Log", icon: ScrollText },
   { href: "/integrations", label: "Integrasi", icon: KeyRound },
-  { href: "/project", label: "Project Plan", icon: ClipboardList },
 ];
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
-  const { user, ready, logout, reset, leads } = useStore();
+  const { user, ready, logout, reset, leads, live } = useStore();
   const router = useRouter();
   const path = usePathname();
   const [open, setOpen] = useState(false);
@@ -64,7 +63,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-slate-200 bg-white lg:flex">
         <Brand />
         <div className="flex-1 overflow-y-auto">{nav}</div>
-        {user.role === "admin" && <Footer onReset={reset} />}
+        {user.role === "admin" && !live && <Footer onReset={reset} />}
       </aside>
 
       {open && (
@@ -73,7 +72,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <aside className="absolute inset-y-0 left-0 flex w-64 flex-col bg-white shadow-xl">
             <div className="flex items-center justify-between pr-3"><Brand /><button onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button></div>
             <div className="flex-1 overflow-y-auto">{nav}</div>
-            {user.role === "admin" && <Footer onReset={reset} />}
+            {user.role === "admin" && !live && <Footer onReset={reset} />}
           </aside>
         </div>
       )}
@@ -81,7 +80,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-slate-200 bg-white/90 px-4 backdrop-blur">
           <button className="lg:hidden" onClick={() => setOpen(true)} aria-label="Buka menu"><Menu size={20} /></button>
-          <span className="hidden rounded-md bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 sm:inline">MODE DEMO · data dummy</span>
+          {!live && <span className="hidden rounded-md bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 sm:inline">MODE DEMO · data dummy</span>}
           <div className="ml-auto flex items-center gap-3">
             <div className="text-right leading-tight">
               <div className="text-sm font-semibold">{user.name}</div>

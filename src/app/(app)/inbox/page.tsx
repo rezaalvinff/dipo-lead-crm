@@ -94,7 +94,8 @@ function Inbox() {
 }
 
 function Chat({ leadId, onBack }: { leadId: string; onBack: () => void }) {
-    const { visibleLeads, messagesFor, sendReply } = useStore();
+    const { visibleLeads, messagesFor, sendReply, sendTemplate, live } = useStore();
+    const [liveTemplates, setLiveTemplates] = useState<{ name: string; language: string; body: string; params: number }[] | null>(null);
     const l = visibleLeads.find((x) => x.id === leadId)!;
     const msgs = messagesFor(leadId);
     const [text, setText] = useState("");
@@ -102,9 +103,14 @@ function Chat({ leadId, onBack }: { leadId: string; onBack: () => void }) {
     const end = useRef<HTMLDivElement>(null);
     const open24 = inWindow(l);
     useEffect(() => { end.current?.scrollIntoView(); }, [msgs.length]);
+    useEffect(() => {
+      if (!live || open24 || liveTemplates) return;
+      fetch("/api/rpc", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "templates" }) })
+        .then((r) => r.json()).then((d) => setLiveTemplates(d.templates ?? [])).catch(() => setLiveTemplates([]));
+    }, [live, open24, liveTemplates]);
 
-    const send = (t: string, template = false) => {
-      const r = sendReply(leadId, t, template);
+    const send = async (t: string, template = false) => {
+      const r = await sendReply(leadId, t, template);
       if (r.ok) { setText(""); setErr(undefined); } else setErr(r.error);
     };
 
@@ -139,7 +145,17 @@ function Chat({ leadId, onBack }: { leadId: string; onBack: () => void }) {
           {l.aiActive && <div className="mb-2 flex items-center gap-2 rounded-lg bg-violet-50 px-3 py-2 text-xs text-violet-700"><Bot size={14} /> AI sedang mengumpulkan data (COLD). Membalas sekarang = human takeover (AI berhenti).</div>}
           {!open24 && <div className="mb-2 flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800"><Clock size={14} /> Di luar 24-hour window — hanya template approved yang bisa dikirim.</div>}
           {err && <div className="mb-2 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">{err}</div>}
-          {!open24 ? (
+          {!open24 && live ? (
+            <div className="flex flex-col gap-2">
+              {liveTemplates === null && <div className="text-xs text-slate-400">Memuat template…</div>}
+              {liveTemplates?.length === 0 && <div className="text-xs text-slate-500">Belum ada template approved (cek WHATSAPP_WABA_ID dan buat template di WhatsApp Manager).</div>}
+              {liveTemplates?.map((t) => {
+                const params = Array.from({ length: t.params }, (_, i) => (i === 0 ? l.name ?? "Bapak/Ibu" : l.unit ?? "Mitsubishi"));
+                const preview = params.reduce((b, p, i) => b.replace(`{{${i + 1}}}`, p), t.body);
+                return <button key={t.name + t.language} onClick={async () => { const r = await sendTemplate(leadId, t, params); setErr(r.ok ? undefined : r.error); }} className="btn-ghost justify-start text-left text-xs"><FileText size={14} className="shrink-0" /><span><b>{t.name}</b> · {preview}</span></button>;
+              })}
+            </div>
+          ) : !open24 ? (
             <div className="flex flex-col gap-2">
               {TEMPLATES.map((t) => {
                 const filled = t.replace("{nama}", l.name ?? "Bapak/Ibu").replace("{unit}", l.unit ?? "Mitsubishi");

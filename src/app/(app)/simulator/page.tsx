@@ -28,7 +28,12 @@ export default function SimulatorPage() {
   useEffect(() => { end.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs.length]);
   const lead = leads.find((l) => l.id === leadId);
 
-  const send = (t: string) => { if (!t.trim()) return; setLeadId(simulateInbound(phone, t.trim(), source)); setText(""); };
+  const [busy, setBusy] = useState(false);
+  const send = async (t: string) => {
+    if (!t.trim() || busy) return;
+    setText(""); setBusy(true);
+    try { setLeadId(await simulateInbound(phone, t.trim(), source)); } finally { setBusy(false); }
+  };
   const restart = () => { setPhone(randPhone()); setLeadId(undefined); };
 
   return (
@@ -75,7 +80,7 @@ export default function SimulatorPage() {
           </div>
           <form className="flex gap-2 border-t border-slate-200 p-3" onSubmit={(e) => { e.preventDefault(); send(text); }}>
             <input className="input" placeholder='Contoh: "Saya Budi dari Medan, mau Xpander"' value={text} onChange={(e) => setText(e.target.value)} />
-            <button className="btn-primary" disabled={!text.trim()}><Send size={16} /></button>
+            <button className="btn-primary" disabled={!text.trim() || busy}>{busy ? "…" : <Send size={16} />}</button>
           </form>
         </div>
       </div>

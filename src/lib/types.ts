@@ -28,6 +28,12 @@ export interface Lead {
   unit?: string;
   source: LeadSource;
   campaign?: string;
+  /** Ad id dari referral Click-to-WhatsApp (untuk menghubungkan ke hasil iklan). */
+  adId?: string;
+  /** Click id CTWA, dipakai untuk Conversions API. */
+  ctwaClid?: string;
+  /** Status pengiriman event ke Meta CAPI. */
+  capiStatus?: "sent" | "failed";
   /** User id agent yang menangani. */
   agentId?: string;
   /** Lead WARM yang domisilinya tidak cocok dengan wilayah agent mana pun. */

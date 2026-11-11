@@ -3,10 +3,14 @@
 Prototype tampilan **AI WhatsApp Lead Management System — Mitsubishi DIPO**, dibangun dari workbook
 *Project Plan AI WhatsApp Lead Management DIPO v1.0*.
 
-> ⚠️ **Mode demo.** Ini frontend saja: semua data dummy, tersimpan di `localStorage` browser masing-masing.
-> Belum ada backend, database, WhatsApp Cloud API, AI API, maupun Meta CAPI.
+Aplikasi punya dua mode:
 
-## Login demo
+- **Demo** (default, tanpa env var): data dummy di `localStorage` browser — untuk melihat tampilan.
+- **Live** (setelah `DATABASE_URL` dll. di-set): database Postgres, login sungguhan, chatbot WhatsApp
+  dengan AI Claude, auto-assign agent, sync hasil Meta Ads, dan Conversions API.
+  Lihat **[SETUP.md](SETUP.md)** untuk langkah lengkapnya.
+
+## Login demo (mode demo saja)
 
 | Role | Username | Password | Akses |
 |---|---|---|---|
@@ -32,7 +36,8 @@ Prototype tampilan **AI WhatsApp Lead Management System — Mitsubishi DIPO**, d
 | Kelola Agent | Admin | Tambah/edit/hapus user, role akses, nama wilayah, daftar domisili, uji auto-assign |
 | Knowledge Chatbot | Admin | Knowledge base (kata kunci → jawaban), persona, sapaan, pertanyaan, pesan handover, daftar unit |
 | Simulator | Admin | Chat sebagai pelanggan untuk menguji AI + knowledge + auto-assign |
-| Laporan, Audit Log, Integrasi, Project Plan | Admin | — |
+| Integrasi | Admin | Status WhatsApp & AI, callback webhook, login Facebook, hasil iklan, log Conversions API |
+| Laporan, Audit Log | Admin | — |
 
 ## Jalankan lokal
 
@@ -47,12 +52,15 @@ Buka http://localhost:3000.
 
 1. Login ke https://vercel.com pakai akun GitHub.
 2. **Add New → Project** → pilih repo `dipo-lead-crm` → **Import**.
-3. Framework otomatis terdeteksi **Next.js**. Tidak perlu env var. Klik **Deploy**.
+3. Framework otomatis terdeteksi **Next.js**. Klik **Deploy** (tanpa env var = mode demo).
+4. Untuk mode live, ikuti [SETUP.md](SETUP.md).
 
 ## Struktur
 
 ```
-src/lib/        types, seed (data dummy), store (state), routing (domisili → agent), mock AI + knowledge
+src/lib/        types, seed (data dummy), store (state demo/live), routing (domisili → agent), mock AI
+src/lib/server/ database, auth, WhatsApp, AI Claude, Meta (OAuth, insights, CAPI), pipeline pesan
+src/app/api/    webhook WhatsApp, login, state, rpc, OAuth Meta, cron harian
 src/app/(app)/  halaman-halaman setelah login
 src/components/ AppShell (sidebar), komponen UI
 ```

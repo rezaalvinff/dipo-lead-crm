@@ -12,7 +12,7 @@ const DEMO = [
 ];
 
 export default function LoginPage() {
-  const { login, user, ready } = useStore();
+  const { login, user, ready, live } = useStore();
   const router = useRouter();
   const [u, setU] = useState("");
   const [p, setP] = useState("");
@@ -23,9 +23,12 @@ export default function LoginPage() {
     if (ready && user) router.replace(user.role === "admin" ? "/dashboard" : "/inbox");
   }, [ready, user, router]);
 
-  const submit = (e: React.FormEvent) => {
+  const [busy, setBusy] = useState(false);
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const r = login(u, p);
+    setBusy(true);
+    const r = await login(u, p);
+    setBusy(false);
     if (!r.ok) setErr(r.error);
   };
 
@@ -53,11 +56,11 @@ export default function LoginPage() {
               </div>
             </div>
             {err && <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{err}</div>}
-            <button className="btn-primary w-full py-2.5" disabled={!u || !p}><LogIn size={16} /> Masuk</button>
+            <button className="btn-primary w-full py-2.5" disabled={!u || !p || busy}><LogIn size={16} /> Masuk</button>
           </form>
         </div>
 
-        <div className="mt-4 rounded-xl bg-white/10 p-4 text-xs text-white/90 backdrop-blur">
+        {!live && <div className="mt-4 rounded-xl bg-white/10 p-4 text-xs text-white/90 backdrop-blur">
           <div className="mb-2 font-semibold">Akun demo (klik untuk isi otomatis)</div>
           <div className="space-y-1">
             {DEMO.map((d) => (
@@ -66,7 +69,7 @@ export default function LoginPage() {
               </button>
             ))}
           </div>
-        </div>
+        </div>}
       </div>
     </div>
   );

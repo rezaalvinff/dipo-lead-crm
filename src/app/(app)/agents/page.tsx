@@ -79,7 +79,7 @@ export default function AgentsPage() {
 }
 
 function UserForm({ initial, onClose }: { initial: User; onClose: () => void }) {
-  const { users, saveUser } = useStore();
+  const { users, saveUser, live } = useStore();
   const isNew = !users.some((u) => u.id === initial.id);
   const [u, setU] = useState<User>(initial);
   const [city, setCity] = useState("");
@@ -92,8 +92,8 @@ function UserForm({ initial, onClose }: { initial: User; onClose: () => void }) 
     setCity("");
   };
 
-  const save = () => {
-    const r = saveUser(u);
+  const save = async () => {
+    const r = await saveUser(u);
     if (r.ok) onClose(); else setErr(r.error);
   };
 
@@ -108,7 +108,7 @@ function UserForm({ initial, onClose }: { initial: User; onClose: () => void }) 
           <Field label="Nama"><input className="input" value={u.name} onChange={(e) => set({ name: e.target.value })} placeholder="mis. Dewi" /></Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Username"><input className="input" value={u.username} onChange={(e) => set({ username: e.target.value.replace(/\s/g, "") })} /></Field>
-            <Field label="Password"><input className="input" value={u.password} onChange={(e) => set({ password: e.target.value })} placeholder="min. 6 karakter" /></Field>
+            <Field label="Password"><input className="input" value={u.password} onChange={(e) => set({ password: e.target.value })} placeholder={isNew || !live ? "min. 6 karakter" : "kosongkan = tidak diubah"} /></Field>
           </div>
 
           <Field label="Akses (role)">
