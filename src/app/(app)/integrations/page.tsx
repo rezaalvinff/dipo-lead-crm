@@ -1,8 +1,6 @@
 "use client";
 
-import { useStore } from "@/lib/store";
-import { can } from "@/lib/permissions";
-import { Forbidden, PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/ui";
 
 const ITEMS = [
   { name: "Meta WhatsApp Cloud API", phase: "Phase 7", env: ["WHATSAPP_PHONE_NUMBER_ID", "WHATSAPP_ACCESS_TOKEN", "WHATSAPP_VERIFY_TOKEN", "META_APP_SECRET"], desc: "Webhook HTTPS, verifikasi signature, inbound/outbound, status, template, 24-hour window." },
@@ -12,11 +10,9 @@ const ITEMS = [
 ];
 
 export default function IntegrationsPage() {
-  const { user } = useStore();
-  if (!user || !can.manageIntegrations(user.role)) return <Forbidden />;
-  return (
+    return (
     <>
-      <PageHeader title="Integrasi" desc="Hanya Super Admin. Kredensial disimpan di environment variables / secret manager — tidak pernah ditampilkan di UI atau disimpan di repository." />
+      <PageHeader title="Integrasi" desc="Khusus Admin. Kredensial disimpan di environment variables / secret manager — tidak pernah ditampilkan di UI atau disimpan di repository." />
       <div className="grid gap-4 md:grid-cols-2">
         {ITEMS.map((i) => (
           <div key={i.name} className="card p-5">

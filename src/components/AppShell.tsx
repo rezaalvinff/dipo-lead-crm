@@ -4,25 +4,25 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  LayoutDashboard, Users, MessageSquare, Inbox, UserCog, MapPinned, FlaskConical, BarChart3,
+  LayoutDashboard, Users, MessageSquare, Inbox, UserCog, FlaskConical, BarChart3, BookOpen,
   ScrollText, KeyRound, ClipboardList, Menu, X, LogOut, RotateCcw,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { can, ROLE_LABEL } from "@/lib/permissions";
-import type { Role } from "@/lib/types";
+import { ROLE_LABEL } from "@/lib/permissions";
 
-const NAV: { href: string; label: string; icon: React.ElementType; show: (r: Role) => boolean }[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, show: () => true },
-  { href: "/inbox", label: "Inbox", icon: MessageSquare, show: () => true },
-  { href: "/leads", label: "Leads", icon: Users, show: () => true },
-  { href: "/queue", label: "Admin Queue", icon: Inbox, show: can.manageQueue },
-  { href: "/agents", label: "Sales Agent", icon: UserCog, show: can.manageAvailability },
-  { href: "/territory", label: "Routing Wilayah", icon: MapPinned, show: can.manageTerritory },
-  { href: "/reports", label: "Laporan", icon: BarChart3, show: can.viewReports },
-  { href: "/simulator", label: "Simulator", icon: FlaskConical, show: can.useSimulator },
-  { href: "/audit", label: "Audit Log", icon: ScrollText, show: can.viewAudit },
-  { href: "/integrations", label: "Integrasi", icon: KeyRound, show: can.manageIntegrations },
-  { href: "/project", label: "Project Plan", icon: ClipboardList, show: () => true },
+/** agent: true = menu juga tersedia untuk role Agent. Selain itu khusus Admin. */
+const NAV: { href: string; label: string; icon: React.ElementType; agent?: boolean }[] = [
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/inbox", label: "Inbox", icon: MessageSquare, agent: true },
+  { href: "/leads", label: "Leads", icon: Users, agent: true },
+  { href: "/queue", label: "Admin Queue", icon: Inbox },
+  { href: "/agents", label: "Kelola Agent", icon: UserCog },
+  { href: "/knowledge", label: "Knowledge Chatbot", icon: BookOpen },
+  { href: "/simulator", label: "Simulator", icon: FlaskConical },
+  { href: "/reports", label: "Laporan", icon: BarChart3 },
+  { href: "/audit", label: "Audit Log", icon: ScrollText },
+  { href: "/integrations", label: "Integrasi", icon: KeyRound },
+  { href: "/project", label: "Project Plan", icon: ClipboardList },
 ];
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
@@ -31,16 +31,21 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const [open, setOpen] = useState(false);
 
-  useEffect(() => { if (ready && !user) router.replace("/"); }, [ready, user, router]);
+  const allowed = user?.role === "admin" || NAV.some((n) => n.agent && path.startsWith(n.href));
+  useEffect(() => {
+    if (!ready) return;
+    if (!user) router.replace("/");
+    else if (!allowed) router.replace("/inbox");
+  }, [ready, user, allowed, router]);
   useEffect(() => { setOpen(false); }, [path]);
 
-  if (!ready || !user) return <div className="grid h-screen place-items-center text-sm text-slate-400">Memuat…</div>;
+  if (!ready || !user || !allowed) return <div className="grid h-screen place-items-center text-sm text-slate-400">Memuat…</div>;
 
   const queueCount = leads.filter((l) => l.inQueue).length;
 
   const nav = (
     <nav className="flex flex-col gap-1 p-3">
-      {NAV.filter((n) => n.show(user.role)).map((n) => {
+      {NAV.filter((n) => user.role === "admin" || n.agent).map((n) => {
         const active = path.startsWith(n.href);
         const Icon = n.icon;
         return (
@@ -59,7 +64,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-slate-200 bg-white lg:flex">
         <Brand />
         <div className="flex-1 overflow-y-auto">{nav}</div>
-        <Footer onReset={reset} />
+        {user.role === "admin" && <Footer onReset={reset} />}
       </aside>
 
       {open && (
@@ -68,7 +73,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <aside className="absolute inset-y-0 left-0 flex w-64 flex-col bg-white shadow-xl">
             <div className="flex items-center justify-between pr-3"><Brand /><button onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button></div>
             <div className="flex-1 overflow-y-auto">{nav}</div>
-            <Footer onReset={reset} />
+            {user.role === "admin" && <Footer onReset={reset} />}
           </aside>
         </div>
       )}
@@ -80,9 +85,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <div className="ml-auto flex items-center gap-3">
             <div className="text-right leading-tight">
               <div className="text-sm font-semibold">{user.name}</div>
-              <div className="text-xs text-slate-500">{ROLE_LABEL[user.role]}</div>
+              <div className="text-xs text-slate-500">{ROLE_LABEL[user.role]}{user.territory ? ` · ${user.territory}` : ""}</div>
             </div>
-            <button onClick={() => { logout(); router.replace("/"); }} className="btn-ghost px-2" title="Ganti role / logout"><LogOut size={16} /></button>
+            <button onClick={() => { logout(); router.replace("/"); }} className="btn-ghost px-2" title="Logout"><LogOut size={16} /></button>
           </div>
         </header>
         <main className="mx-auto w-full max-w-7xl flex-1 p-4 sm:p-6">{children}</main>

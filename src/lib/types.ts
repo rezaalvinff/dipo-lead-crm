@@ -1,25 +1,23 @@
-export type Role = "super_admin" | "admin" | "sales";
+export type Role = "admin" | "agent";
 
 export type LeadSource = "Meta Ads" | "Google Ads" | "Google Organic" | "WhatsApp Organic" | "Unknown";
 export const LEAD_SOURCES: LeadSource[] = ["Meta Ads", "Google Ads", "Google Organic", "WhatsApp Organic", "Unknown"];
 
+/** COLD = data belum lengkap. WARM = nama, domisili, dan unit sudah lengkap. */
 export type LeadStatus = "COLD" | "WARM";
 
 export interface User {
   id: string;
   name: string;
+  username: string;
+  /** Demo saja — di produksi password di-hash di backend. */
+  password: string;
   role: Role;
-  agentId?: string;
-}
-
-export interface Agent {
-  id: string;
-  name: string;
-  territory: string;
-  /** Kota/kabupaten yang secara eksplisit ditangani agent (exact match, termasuk alias). */
+  active: boolean;
+  /** Khusus agent: nama wilayah, mis. "Jakarta". */
+  territory?: string;
+  /** Khusus agent: daftar domisili (kota/kabupaten) yang auto di-route ke agent ini. */
   cities: string[];
-  available: boolean;
-  capacity: number;
 }
 
 export interface Lead {
@@ -30,8 +28,9 @@ export interface Lead {
   unit?: string;
   source: LeadSource;
   campaign?: string;
-  status: LeadStatus;
+  /** User id agent yang menangani. */
   agentId?: string;
+  /** Lead WARM yang domisilinya tidak cocok dengan wilayah agent mana pun. */
   inQueue: boolean;
   queueReason?: string;
   /** true selama AI masih melakukan kualifikasi. false setelah handover. */
@@ -52,6 +51,8 @@ export interface Message {
   author?: string;
   status?: "sent" | "delivered" | "read";
   template?: boolean;
+  /** Judul knowledge yang dipakai AI untuk menjawab (jika ada). */
+  knowledge?: string;
 }
 
 export interface AuditEntry {
@@ -61,4 +62,25 @@ export interface AuditEntry {
   action: string;
   target: string;
   detail?: string;
+}
+
+export interface KnowledgeItem {
+  id: string;
+  title: string;
+  category: string;
+  /** Kata kunci pemicu (lowercase). */
+  keywords: string[];
+  answer: string;
+  active: boolean;
+}
+
+export interface BotSettings {
+  persona: string;
+  greeting: string;
+  askName: string;
+  askCity: string;
+  askUnit: string;
+  /** Placeholder: {nama} {domisili} {unit} */
+  handover: string;
+  units: string[];
 }

@@ -4,21 +4,21 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Bot, RefreshCw, Send } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { can } from "@/lib/permissions";
 import { LEAD_SOURCES, type LeadSource } from "@/lib/types";
-import { Forbidden, PageHeader, StatusBadge } from "@/components/ui";
+import { PageHeader, StatusBadge } from "@/components/ui";
 
 const randPhone = () => `+62 81${Math.floor(Math.random() * 9)} ${Math.floor(1000 + Math.random() * 8999)} ${Math.floor(1000 + Math.random() * 8999)}`;
 
 const SCENARIOS = [
-  { label: "UAT-02: semua data sekaligus", text: "Halo, nama saya Andi Wijaya dari Medan, mau tanya Pajero Sport" },
-  { label: "UAT-06: di luar wilayah", text: "Saya Rina dari Bandung, minat Xforce" },
-  { label: "UAT-07: agent tidak tersedia", text: "Saya Bambang di Surabaya, mau Triton" },
-  { label: "Unit belum tahu", text: "Saya Lukas dari Pekanbaru, masih belum tahu mau unit apa" },
+  { label: "Data lengkap sekaligus → WARM", text: "Halo, nama saya Andi Wijaya dari Medan, mau tanya Pajero Sport" },
+  { label: "Domisili Karawang → agent Jakarta", text: "Saya Bambang dari Karawang, minat Xforce" },
+  { label: "Di luar wilayah → Admin Queue", text: "Saya Rina dari Bandung, minat Xpander" },
+  { label: "Tanya promo (knowledge)", text: "Halo kak, ada promo apa bulan ini?" },
+  { label: "Tanya kredit (knowledge)", text: "Bisa kredit gak? DP berapa?" },
 ];
 
 export default function SimulatorPage() {
-  const { user, simulateInbound, messagesFor, leads, agentById } = useStore();
+  const { simulateInbound, messagesFor, leads, userById: agentById } = useStore();
   const [phone, setPhone] = useState(randPhone);
   const [source, setSource] = useState<LeadSource>("Meta Ads");
   const [text, setText] = useState("");
@@ -26,7 +26,6 @@ export default function SimulatorPage() {
   const end = useRef<HTMLDivElement>(null);
   const msgs = leadId ? messagesFor(leadId) : [];
   useEffect(() => { end.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs.length]);
-  if (!user || !can.useSimulator(user.role)) return <Forbidden />;
   const lead = leads.find((l) => l.id === leadId);
 
   const send = (t: string) => { if (!t.trim()) return; setLeadId(simulateInbound(phone, t.trim(), source)); setText(""); };
@@ -34,7 +33,7 @@ export default function SimulatorPage() {
 
   return (
     <>
-      <PageHeader title="Simulator Chat" desc="Uji alur AI kualifikasi → handover → routing tanpa nomor WhatsApp aktif (FR-026). Tidak mengirim pesan eksternal." />
+      <PageHeader title="Simulator Chat" desc="Coba chat sebagai pelanggan: AI menjawab pakai knowledge, mengumpulkan nama/domisili/unit, lalu meneruskan ke agent sesuai wilayah. Tidak mengirim pesan WhatsApp sungguhan." />
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-4">
           <div className="card space-y-3 p-5">
@@ -51,7 +50,7 @@ export default function SimulatorPage() {
               <h2 className="font-semibold">Hasil ekstraksi AI</h2>
               {[["Nama", lead.name], ["Domisili", lead.city], ["Unit", lead.unit]].map(([k, v]) => <div key={k} className="flex justify-between"><span className="text-slate-500">{k}</span><span className={v ? "font-medium" : "text-slate-400"}>{v ?? "belum"}</span></div>)}
               <div className="flex justify-between"><span className="text-slate-500">Status</span><StatusBadge status={lead.status} inQueue={lead.inQueue} /></div>
-              <div className="flex justify-between"><span className="text-slate-500">Sales</span><span className="font-medium">{agentById(lead.agentId)?.name ?? "—"}</span></div>
+              <div className="flex justify-between"><span className="text-slate-500">Agent</span><span className="font-medium">{agentById(lead.agentId)?.name ?? "—"}</span></div>
               <Link href={`/inbox?lead=${lead.id}`} className="btn-primary mt-2 w-full">Buka di Inbox</Link>
             </div>
           )}
@@ -67,7 +66,8 @@ export default function SimulatorPage() {
               <div key={m.id} className={`flex ${m.from === "customer" ? "justify-end" : "justify-start"}`}>
                 <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm shadow-sm ${m.from === "customer" ? "bg-[#d9fdd3]" : "bg-white"}`}>
                   {m.from !== "customer" && <div className="mb-0.5 text-[11px] font-semibold text-slate-500">{m.from === "ai" ? "Mitsubishi DIPO (AI)" : `Mitsubishi DIPO · ${m.author}`}</div>}
-                  {m.text}
+                  <div className="whitespace-pre-wrap">{m.text}</div>
+                  {m.knowledge && <div className="mt-1 text-[10px] text-violet-600">📚 knowledge: {m.knowledge}</div>}
                 </div>
               </div>
             ))}

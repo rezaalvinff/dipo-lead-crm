@@ -1,30 +1,19 @@
-import type { Agent, Lead } from "./types";
+import type { User } from "./types";
 
 export const normalizeCity = (s: string) =>
   s.toLowerCase().replace(/^(kota|kab\.?|kabupaten)\s+/, "").replace(/\s+/g, " ").trim();
 
-export type RouteResult =
-  | { kind: "assigned"; agent: Agent }
-  | { kind: "queue"; reason: string };
+export type RouteResult = { kind: "assigned"; agent: User } | { kind: "queue"; reason: string };
 
 /**
- * Aturan routing (sheet "Routing Wilayah"):
- * 1. Exact match kota/kabupaten atau alias yang diinput admin.
- * 2. Tidak menebak kota terdekat.
- * 3. Tidak ada mapping -> Admin Queue (COLD).
- * 4. Agent tidak tersedia / kapasitas penuh -> fallback default Admin Queue.
- * 5. WARM hanya setelah assignment resmi.
+ * Domisili pelanggan dicocokkan persis (exact match) dengan daftar domisili tiap agent.
+ * Tidak cocok / agent nonaktif -> Admin Queue untuk di-assign manual.
  */
-export function routeLead(city: string | undefined, agents: Agent[], leads: Lead[]): RouteResult {
+export function routeLead(city: string | undefined, users: User[]): RouteResult {
   if (!city) return { kind: "queue", reason: "Domisili belum diketahui" };
   const c = normalizeCity(city);
-  const agent = agents.find((a) => a.cities.some((x) => normalizeCity(x) === c));
-  if (!agent) return { kind: "queue", reason: `Domisili "${city}" tidak ada di mapping wilayah` };
-  if (!agent.available) return { kind: "queue", reason: `${agent.name} sedang tidak tersedia` };
-  const load = activeLoad(agent.id, leads);
-  if (load >= agent.capacity) return { kind: "queue", reason: `Kapasitas ${agent.name} penuh (${load}/${agent.capacity})` };
+  const agent = users.find((u) => u.role === "agent" && u.cities.some((x) => normalizeCity(x) === c));
+  if (!agent) return { kind: "queue", reason: `Domisili "${city}" belum terdaftar di wilayah agent mana pun` };
+  if (!agent.active) return { kind: "queue", reason: `${agent.name} sedang nonaktif` };
   return { kind: "assigned", agent };
 }
-
-export const activeLoad = (agentId: string, leads: Lead[]) =>
-  leads.filter((l) => l.agentId === agentId && l.status === "WARM").length;

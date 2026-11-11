@@ -1,13 +1,11 @@
 "use client";
 
 import { useStore } from "@/lib/store";
-import { can } from "@/lib/permissions";
 import { fmtTime } from "@/lib/format";
-import { Forbidden, PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/ui";
 
 export default function AuditPage() {
-  const { audit, user } = useStore();
-  if (!user || !can.viewAudit(user.role)) return <Forbidden />;
+  const { audit } = useStore();
   return (
     <>
       <PageHeader title="Audit Log" desc="Login, assignment, perubahan territory, availability, dan tindakan admin (FR-027)." />

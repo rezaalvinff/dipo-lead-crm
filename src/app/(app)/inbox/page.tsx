@@ -4,7 +4,6 @@ import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Bot, Check, CheckCheck, Clock, Search, Send, FileText } from "lucide-react";
 import { inWindow, useStore } from "@/lib/store";
-import { can } from "@/lib/permissions";
 import { fmtTime, timeAgo } from "@/lib/format";
 import { Empty, SourceBadge, StatusBadge } from "@/components/ui";
 import AssignControl from "@/components/AssignControl";
@@ -19,7 +18,7 @@ export default function InboxPage() {
 }
 
 function Inbox() {
-  const { visibleLeads, messagesFor, agentById, user, sendReply } = useStore();
+  const { visibleLeads, messagesFor, userById: agentById, user } = useStore();
   const params = useSearchParams();
   const router = useRouter();
   const [q, setQ] = useState("");
@@ -84,10 +83,10 @@ function Inbox() {
             ))}
             <div><dt className="text-xs text-slate-500">Sumber</dt><dd><SourceBadge source={lead.source} /></dd></div>
             <div><dt className="text-xs text-slate-500">Status</dt><dd><StatusBadge status={lead.status} inQueue={lead.inQueue} /></dd></div>
-            <div><dt className="text-xs text-slate-500">Sales</dt><dd className="font-medium">{agentById(lead.agentId)?.name ?? "Belum ditugaskan"}</dd></div>
+            <div><dt className="text-xs text-slate-500">Agent</dt><dd className="font-medium">{agentById(lead.agentId)?.name ?? "Belum ditugaskan"}</dd></div>
             {lead.queueReason && <div className="rounded-lg bg-amber-50 p-2 text-xs text-amber-800">{lead.queueReason}</div>}
           </dl>
-          {user && can.assign(user.role) && <div className="mt-4"><div className="mb-2 text-xs font-semibold text-slate-500">ASSIGN / REASSIGN</div><AssignControl lead={lead} /></div>}
+          {user?.role === "admin" && <div className="mt-4"><div className="mb-2 text-xs font-semibold text-slate-500">ASSIGN / REASSIGN</div><AssignControl lead={lead} /></div>}
         </aside>
       )}
     </div>
@@ -127,7 +126,7 @@ function Chat({ leadId, onBack }: { leadId: string; onBack: () => void }) {
           ) : (
             <div key={m.id} className={`flex ${m.from === "customer" ? "justify-start" : "justify-end"}`}>
               <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm shadow-sm ${m.from === "customer" ? "bg-white" : m.from === "ai" ? "bg-violet-100" : "bg-[#d9fdd3]"}`}>
-                {m.from !== "customer" && <div className="mb-0.5 flex items-center gap-1 text-[11px] font-semibold text-slate-500">{m.from === "ai" ? <><Bot size={12} /> AI Assistant</> : <>{m.author}{m.template && " · template"}</>}</div>}
+                {m.from !== "customer" && <div className="mb-0.5 flex items-center gap-1 text-[11px] font-semibold text-slate-500">{m.from === "ai" ? <><Bot size={12} /> AI Assistant{m.knowledge && <span className="font-normal"> · knowledge: {m.knowledge}</span>}</> : <>{m.author}{m.template && " · template"}</>}</div>}
                 <div className="whitespace-pre-wrap">{m.text}</div>
                 <div className="mt-1 flex items-center justify-end gap-1 text-[10px] text-slate-400">{fmtTime(m.at)}{m.status === "sent" && <Check size={12} />}{m.status === "delivered" && <CheckCheck size={12} />}{m.status === "read" && <CheckCheck size={12} className="text-sky-500" />}</div>
               </div>
@@ -137,7 +136,7 @@ function Chat({ leadId, onBack }: { leadId: string; onBack: () => void }) {
         </div>
 
         <div className="border-t border-slate-200 bg-white p-3">
-          {l.aiActive && <div className="mb-2 flex items-center gap-2 rounded-lg bg-violet-50 px-3 py-2 text-xs text-violet-700"><Bot size={14} /> AI sedang mengumpulkan data. Membalas sekarang = human takeover (AI berhenti).</div>}
+          {l.aiActive && <div className="mb-2 flex items-center gap-2 rounded-lg bg-violet-50 px-3 py-2 text-xs text-violet-700"><Bot size={14} /> AI sedang mengumpulkan data (COLD). Membalas sekarang = human takeover (AI berhenti).</div>}
           {!open24 && <div className="mb-2 flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800"><Clock size={14} /> Di luar 24-hour window — hanya template approved yang bisa dikirim.</div>}
           {err && <div className="mb-2 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">{err}</div>}
           {!open24 ? (

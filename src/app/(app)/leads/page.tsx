@@ -9,7 +9,7 @@ import { Empty, PageHeader, SourceBadge, StatusBadge } from "@/components/ui";
 import { fmtTime } from "@/lib/format";
 
 export default function LeadsPage() {
-  const { visibleLeads, agents, agentById, user } = useStore();
+  const { visibleLeads, agents, userById: agentById, user } = useStore();
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
   const [source, setSource] = useState("");
@@ -24,7 +24,7 @@ export default function LeadsPage() {
   }), [visibleLeads, q, status, source, agent]);
 
   const exportCsv = () => {
-    const head = ["ID", "Nama", "Nomor", "Domisili", "Unit", "Sumber", "Status", "Sales", "Masuk"];
+    const head = ["ID", "Nama", "Nomor", "Domisili", "Unit", "Sumber", "Status", "Agent", "Masuk"];
     const body = rows.map((l) => [l.id, l.name ?? "", l.phone, l.city ?? "", l.unit ?? "", l.source, l.status, agentById(l.agentId)?.name ?? "", new Date(l.createdAt).toISOString()]);
     const csv = [head, ...body].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
     const a = document.createElement("a");
@@ -35,20 +35,20 @@ export default function LeadsPage() {
 
   return (
     <>
-      <PageHeader title="Leads" desc={user?.role === "sales" ? "Leads yang ditugaskan ke Anda" : "Seluruh leads dari semua sumber"}>
+      <PageHeader title="Leads" desc={user?.role === "agent" ? "Leads yang ditugaskan ke Anda" : "Seluruh leads dari semua sumber"}>
         <button className="btn-ghost" onClick={exportCsv}><Download size={16} /> Export CSV</button>
       </PageHeader>
 
       <div className="card mb-4 grid gap-2 p-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="relative"><Search size={16} className="absolute left-3 top-2.5 text-slate-400" /><input className="input pl-9" placeholder="Cari…" value={q} onChange={(e) => setQ(e.target.value)} /></div>
-        <select className="input" value={status} onChange={(e) => setStatus(e.target.value)}><option value="">Semua status</option><option>COLD</option><option>WARM</option><option value="QUEUE">Admin Queue</option></select>
+        <select className="input" value={status} onChange={(e) => setStatus(e.target.value)}><option value="">Semua status</option><option value="COLD">COLD (belum lengkap)</option><option value="WARM">WARM (lengkap)</option><option value="QUEUE">Admin Queue</option></select>
         <select className="input" value={source} onChange={(e) => setSource(e.target.value)}><option value="">Semua sumber</option>{LEAD_SOURCES.map((s) => <option key={s}>{s}</option>)}</select>
-        {user?.role !== "sales" && <select className="input" value={agent} onChange={(e) => setAgent(e.target.value)}><option value="">Semua sales</option>{agents.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</select>}
+        {user?.role === "admin" && <select className="input" value={agent} onChange={(e) => setAgent(e.target.value)}><option value="">Semua agent</option>{agents.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</select>}
       </div>
 
       <div className="card overflow-x-auto">
         <table className="w-full min-w-[800px]">
-          <thead className="border-b border-slate-200 bg-slate-50"><tr>{["Lead", "Domisili", "Unit", "Sumber", "Status", "Sales", "Masuk"].map((h) => <th key={h} className="th">{h}</th>)}</tr></thead>
+          <thead className="border-b border-slate-200 bg-slate-50"><tr>{["Lead", "Domisili", "Unit", "Sumber", "Status", "Agent", "Masuk"].map((h) => <th key={h} className="th">{h}</th>)}</tr></thead>
           <tbody className="divide-y divide-slate-100">
             {rows.map((l) => (
               <tr key={l.id} className="hover:bg-slate-50">
