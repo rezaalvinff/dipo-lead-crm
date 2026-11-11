@@ -65,7 +65,7 @@ async function onWarm(lead: Lead) {
 }
 
 export interface Inbound {
-  phone: string; text: string; source: LeadSource; campaign?: string; adId?: string; ctwaClid?: string;
+  phone: string; text: string; source: LeadSource; campaign?: string; adId?: string; ctwaClid?: string; adHeadline?: string; sourceUrl?: string;
   waMessageId?: string; profileName?: string; simulate?: boolean;
 }
 
@@ -82,10 +82,10 @@ export async function handleInbound(inb: Inbound): Promise<string> {
   const isFirst = !rows[0];
   if (isFirst) {
     const [{ n }] = await db`select nextval('lead_seq')::int as n`;
-    rows = await db`insert into leads ${db({ id: `L-${n}`, phone, source: inb.source, campaign: inb.campaign ?? null, adId: inb.adId ?? null, ctwaClid: inb.ctwaClid ?? null, aiActive: true, inQueue: false, createdAt: now, lastCustomerMsgAt: now })} on conflict (phone) do nothing returning *`;
+    rows = await db`insert into leads ${db({ id: `L-${n}`, phone, source: inb.source, campaign: inb.campaign ?? null, adId: inb.adId ?? null, ctwaClid: inb.ctwaClid ?? null, adHeadline: inb.adHeadline ?? null, sourceUrl: inb.sourceUrl ?? null, profileName: inb.profileName ?? null, aiActive: true, inQueue: false, createdAt: now, lastCustomerMsgAt: now })} on conflict (phone) do nothing returning *`;
     if (!rows[0]) rows = await db`select * from leads where phone = ${phone}`;
   } else {
-    await db`update leads set last_customer_msg_at = ${now} where phone = ${phone}`;
+    await db`update leads set last_customer_msg_at = ${now}, resolved = false where phone = ${phone}`;
   }
   let lead = toLead(rows[0]);
   await insertMessage({ leadId: lead.id, from: "customer", text: inb.text, at: now, waMessageId: inb.waMessageId });
@@ -142,6 +142,21 @@ export async function replyTemplate(user: User, leadId: string, name: string, la
   const text = params.reduce((t, p, i) => t.replace(`{{${i + 1}}}`, p), body);
   await sql()`update leads set ai_active = false where id = ${leadId}`;
   await insertMessage({ leadId, from: "agent", author: user.name, text, at: Date.now(), status: "sent", template: true, waMessageId: waId });
+}
+
+export async function setAi(user: User, leadId: string, on: boolean) {
+  const lead = await getLead(leadId);
+  assertCanTouch(user, lead);
+  await sql()`update leads set ai_active = ${on} where id = ${leadId}`;
+  await systemMsg(leadId, on ? `Bot diaktifkan kembali oleh ${user.name}` : `Human takeover: ${user.name} mengambil alih percakapan, bot berhenti`);
+  await addAudit(user.name, on ? "Aktifkan bot" : "Human takeover", leadId);
+}
+
+export async function setResolved(user: User, leadId: string, v: boolean) {
+  const lead = await getLead(leadId);
+  assertCanTouch(user, lead);
+  await sql()`update leads set resolved = ${v} where id = ${leadId}`;
+  await systemMsg(leadId, v ? `Percakapan ditandai selesai oleh ${user.name}` : `Percakapan dibuka kembali oleh ${user.name}`);
 }
 
 export async function assignLead(user: User, leadId: string, agentId: string) {

@@ -18,6 +18,8 @@ export const POST = api(async (req: Request) => {
     // (*) boleh untuk agent — pengecekan kepemilikan lead ada di repo
     case "reply": return repo.reply(user, args.leadId, String(args.text).slice(0, 4000));
     case "replyTemplate": return repo.replyTemplate(user, args.leadId, args.name, args.language, args.body, args.params ?? []);
+    case "setAi": return repo.setAi(user, args.leadId, Boolean(args.on));
+    case "setResolved": return repo.setResolved(user, args.leadId, Boolean(args.v));
     case "templates": return { templates: await listTemplates() };
 
     case "assignLead": admin(); return repo.assignLead(user, args.leadId, args.agentId);

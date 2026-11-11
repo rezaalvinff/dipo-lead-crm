@@ -13,7 +13,7 @@ export const seedUsers = (): User[] => [
 ];
 
 export const seedBotSettings = (): BotSettings => ({
-  persona: "Kamu adalah asisten virtual Mitsubishi DIPO. Gunakan bahasa Indonesia yang ramah, sopan, dan singkat. Panggil pelanggan dengan Bapak/Ibu. Tugas utama: kumpulkan nama, domisili (kota/kabupaten), dan unit yang diminati, lalu serahkan ke tim sales. Jangan menjanjikan harga atau diskon spesifik.",
+  persona: "Kamu adalah asisten virtual Mitsubishi DIPO. Gunakan bahasa Indonesia yang ramah, sopan, dan singkat. Panggil pelanggan dengan Bapak/Ibu. Tugas utama: kumpulkan nama, domisili (kota/kabupaten), dan unit yang diminati, lalu serahkan ke tim sales. Jawab pertanyaan hanya berdasarkan knowledge base. Jangan menyebutkan harga, angka cicilan, atau diskon spesifik.",
   greeting: "Halo, terima kasih sudah menghubungi Mitsubishi DIPO! 😊 Saya asisten virtual yang akan membantu meneruskan kebutuhan Bapak/Ibu ke tim sales kami.",
   askName: "Boleh saya tahu dengan Bapak/Ibu siapa?",
   askCity: "Terima kasih, {nama}. Saat ini berdomisili di kota/kabupaten mana?",
@@ -23,11 +23,36 @@ export const seedBotSettings = (): BotSettings => ({
 });
 
 export const seedKnowledge = (): KnowledgeItem[] => [
-  { id: "k1", title: "Promo", category: "Promo", keywords: ["promo", "diskon", "potongan", "cashback"], answer: "Saat ini ada program promo yang berbeda untuk tiap unit dan wilayah. Detail promo terbaru akan dijelaskan langsung oleh tim sales kami ya.", active: true },
-  { id: "k2", title: "Kredit & DP", category: "Pembiayaan", keywords: ["kredit", "cicilan", "dp", "angsuran", "leasing", "simulasi"], answer: "Bisa kredit, Bapak/Ibu. Tim sales kami akan bantu simulasi DP dan cicilan sesuai tenor yang diinginkan.", active: true },
-  { id: "k3", title: "Test drive", category: "Layanan", keywords: ["test drive", "testdrive", "coba mobil"], answer: "Test drive bisa dijadwalkan di dealer terdekat atau di lokasi Bapak/Ibu (syarat & ketentuan berlaku). Sales kami akan bantu atur jadwalnya.", active: true },
-  { id: "k4", title: "Jam operasional", category: "Info dealer", keywords: ["jam buka", "jam operasional", "buka jam", "libur"], answer: "Showroom buka Senin–Sabtu 08.00–17.00 dan Minggu 09.00–15.00. (contoh — sesuaikan dengan jam resmi)", active: true },
-  { id: "k5", title: "Tukar tambah", category: "Layanan", keywords: ["tukar tambah", "trade in", "trade-in"], answer: "Kami melayani tukar tambah. Sales kami akan bantu taksiran harga mobil lama Bapak/Ibu.", active: true },
+  {
+    id: "k-faq", title: "FAQ Umum", category: "FAQ", keywords: ["promo", "diskon"], active: true,
+    answer: `Promo: Program promo berbeda untuk tiap unit dan wilayah, dan diperbarui setiap bulan. Detail promo terbaru akan dijelaskan langsung oleh tim sales kami.
+
+Jam operasional: Showroom buka Senin sampai Sabtu pukul 08.00–17.00 dan Minggu pukul 09.00–15.00. (contoh, sesuaikan dengan jam resmi)
+
+Tukar tambah: Kami melayani tukar tambah (trade-in) semua merek. Sales kami akan bantu taksiran harga mobil lama Bapak/Ibu.`,
+  },
+  {
+    id: "k-kredit", title: "SOP Pembiayaan & Kredit", category: "SOP", keywords: ["kredit", "cicilan", "dp", "leasing"], active: true, fileName: "sop-pembiayaan.txt",
+    answer: `Pembelian bisa tunai maupun kredit melalui leasing rekanan. Tim sales akan membantu simulasi DP dan cicilan sesuai tenor 1 sampai 5 tahun.
+
+Syarat dan dokumen kredit perorangan yang perlu disiapkan: KTP suami dan istri, Kartu Keluarga, NPWP, serta slip gaji atau rekening koran 3 bulan terakhir. Untuk wiraswasta ditambah SIUP atau surat keterangan usaha.
+
+Proses persetujuan kredit biasanya 1 sampai 3 hari kerja setelah berkas lengkap. Angka cicilan pasti akan diberikan sales melalui simulasi resmi.`,
+  },
+  {
+    id: "k-testdrive", title: "SOP Test Drive & Showroom", category: "SOP", keywords: ["test drive", "coba"], active: true, fileName: "sop-test-drive.txt",
+    answer: `Test drive bisa dilakukan di showroom DIPO terdekat, atau di rumah / lokasi pelanggan (home test drive) untuk area tertentu. Pelanggan cukup menyiapkan SIM A yang masih berlaku.
+
+Jadwal test drive diatur oleh sales wilayah masing-masing. Unit test drive yang tersedia dapat berbeda di tiap cabang.
+
+Lokasi showroom tersedia di Medan, Jakarta, Pekanbaru, Surabaya, dan Padang. Alamat lengkap akan dikirim oleh sales sesuai domisili pelanggan.`,
+  },
+  {
+    id: "k-unit", title: "Info Unit Mitsubishi", category: "Produk", keywords: ["unit", "tipe", "varian", "mobil"], active: true, fileName: "brosur-ringkas.txt",
+    answer: `Xpander dan Xpander Cross adalah MPV 7 penumpang untuk keluarga. Xforce adalah compact SUV 5 penumpang. Pajero Sport adalah SUV 7 penumpang bermesin diesel. Triton adalah double cabin dan single cabin untuk kebutuhan usaha maupun petualangan. L300 adalah kendaraan niaga pick-up.
+
+Harga dan ketersediaan warna berbeda per wilayah dan tipe; sales akan mengirimkan price list resmi terbaru.`,
+  },
 ];
 
 const NAMES = ["Budi Santoso", "Siti Aminah", "Hendra", "Lina Marlina", "Agus Salim", "Rina", "Yusuf", "Maya Sari", "Doni Pratama", "Putri", "Fikri", "Nanda", "Irwan", "Wulan", "Taufik", "Ratna", "Bayu", "Citra", "Eko", "Fitri", "Gilang", "Hana", "Joko", "Kiki", "Lukman", "Mega", "Nur", "Oki", "Pandu", "Qori", "Rudi", "Sari"];
@@ -55,8 +80,14 @@ export function seedData(now = Date.now()) {
     const id = `L-${1001 + i}`;
     const phone = `+62 81${2 + (i % 7)} ${String(1000 + i * 37).slice(0, 4)} ${String(5000 + i * 91).slice(0, 4)}`;
 
+    const meta = source === "Meta Ads";
     const lead: Lead = {
-      id, phone, source, campaign: CAMPAIGNS[source],
+      id, phone, source, campaign: CAMPAIGNS[source], profileName: name.split(" ")[0],
+      adId: meta ? `1202${300000 + (i % 3) * 1111}` : undefined,
+      adHeadline: meta ? ["Promo Akhir Tahun Mitsubishi", "Xforce — Test Drive Sekarang", "Pajero Sport DP Ringan"][i % 3] : undefined,
+      sourceUrl: meta ? "https://fb.me/dipo-mitsubishi-ads" : undefined,
+      ctwaClid: meta ? `ARAkLx${(i * 7919).toString(36)}` : undefined,
+      resolved: i % 11 === 10,
       name: incomplete && i % 4 === 0 ? undefined : name,
       city: incomplete ? undefined : city,
       unit: incomplete ? undefined : unit,

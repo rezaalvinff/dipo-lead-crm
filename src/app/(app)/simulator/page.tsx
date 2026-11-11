@@ -13,8 +13,8 @@ const SCENARIOS = [
   { label: "Data lengkap sekaligus → WARM", text: "Halo, nama saya Andi Wijaya dari Medan, mau tanya Pajero Sport" },
   { label: "Domisili Karawang → agent Jakarta", text: "Saya Bambang dari Karawang, minat Xforce" },
   { label: "Di luar wilayah → Admin", text: "Saya Rina dari Cikarang, minat Xpander" },
-  { label: "Tanya promo (knowledge)", text: "Halo kak, ada promo apa bulan ini?" },
-  { label: "Tanya kredit (knowledge)", text: "Bisa kredit gak? DP berapa?" },
+  { label: "RAG: dokumen kredit", text: "Halo kak, dokumen apa saja yang perlu buat kredit?" },
+  { label: "RAG: test drive di rumah", text: "Test drive bisa di rumah gak?" },
 ];
 
 export default function SimulatorPage() {
@@ -72,10 +72,11 @@ export default function SimulatorPage() {
                 <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm shadow-sm ${m.from === "customer" ? "bg-[#d9fdd3]" : "bg-white"}`}>
                   {m.from !== "customer" && <div className="mb-0.5 text-[11px] font-semibold text-slate-500">{m.from === "ai" ? "Mitsubishi DIPO (AI)" : `Mitsubishi DIPO · ${m.author}`}</div>}
                   <div className="whitespace-pre-wrap">{m.text}</div>
-                  {m.knowledge && <div className="mt-1 text-[10px] text-violet-600">📚 knowledge: {m.knowledge}</div>}
+                  {m.sources?.length ? <div className="mt-1 text-[10px] text-violet-600">📚 Konteks RAG: {m.sources.map((x) => `${x.title} #${x.index + 1} (${x.score})`).join(" · ")}</div> : m.knowledge ? <div className="mt-1 text-[10px] text-violet-600">📚 {m.knowledge}</div> : null}
                 </div>
               </div>
             ))}
+            {lead?.typing && <div className="flex justify-start"><div className="rounded-lg bg-white px-3 py-2 text-xs text-slate-500 shadow-sm">Mitsubishi DIPO sedang mengetik<span className="animate-pulse">…</span></div></div>}
             <div ref={end} />
           </div>
           <form className="flex gap-2 border-t border-slate-200 p-3" onSubmit={(e) => { e.preventDefault(); send(text); }}>

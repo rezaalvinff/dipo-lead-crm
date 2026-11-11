@@ -4,9 +4,9 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { AuditEntry, BotSettings, KnowledgeItem, Lead, LeadSource, LeadStatus, Message, User } from "./types";
 import { seedData } from "./seed";
 import { normalizeCity, routeLead } from "./routing";
-import { expectingField, extractFields, matchKnowledge, nextQuestion, statusOf } from "./ai";
+import { botTurn, fill, statusOf } from "./ai";
 
-const KEY = "dipo-crm-demo-v2";
+const KEY = "dipo-crm-demo-v3";
 const WINDOW_MS = 24 * 3600_000;
 
 interface State {
@@ -50,7 +50,10 @@ interface Store extends Omit<State, "leads"> {
   saveKnowledge: (k: KnowledgeItem) => void;
   deleteKnowledge: (id: string) => void;
   updateBot: (patch: Partial<BotSettings>) => void;
-  simulateInbound: (phone: string, text: string, source: LeadSource) => Promise<string>;
+  simulateInbound: (phone: string, text: string, source: LeadSource, meta?: Partial<Pick<Lead, "profileName" | "adId" | "adHeadline" | "sourceUrl" | "ctwaClid" | "campaign">>) => Promise<string>;
+  setAi: (leadId: string, on: boolean) => void;
+  setResolved: (leadId: string, v: boolean) => void;
+  markRead: (leadId: string) => void;
 }
 
 const Ctx = createContext<Store | null>(null);
@@ -215,49 +218,71 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setState((s) => ({ ...s, knowledge: s.knowledge.filter((x) => x.id !== id), audit: log(s, "Hapus knowledge", s.knowledge.find((x) => x.id === id)?.title ?? id) }));
   const demo_updateBot = (patch: Partial<BotSettings>) => setState((s) => ({ ...s, bot: { ...s.bot, ...patch }, audit: log(s, "Ubah pengaturan chatbot", Object.keys(patch).join(", ")) }));
 
-  const demo_simulateInbound = (phone: string, text: string, source: LeadSource): string => {
+  type InboundMeta = Partial<Pick<Lead, "profileName" | "adId" | "adHeadline" | "sourceUrl" | "ctwaClid" | "campaign">>;
+  /**
+   * Demo pipeline (meniru backend): pesan pelanggan masuk → AI "mengetik" → balasan RAG + kualifikasi
+   * → jika lengkap: WARM, handover, routing domisili.
+   */
+  const demo_simulateInbound = (phone: string, text: string, source: LeadSource, meta: InboundMeta = {}, delay = 1200): string => {
     const s0 = ref.current;
     const existing = s0.leads.find((l) => l.phone === phone);
     const now = Date.now();
     const leadId = existing?.id ?? `L-${1001 + s0.leads.length}`;
+    const isFirst = !existing;
 
+    // Tahap 1: pesan masuk (seperti event WebSocket dari webhook).
     setState((s) => {
-      let lead: Lead = existing
-        ? { ...existing, lastCustomerMsgAt: now }
-        : { id: leadId, phone, source, campaign: source === "Meta Ads" ? "CTWA - Simulator" : undefined, inQueue: false, aiActive: true, createdAt: now, lastCustomerMsgAt: now };
-      const msgs: Message[] = [{ id: uid(), leadId, from: "customer", text, at: now }];
+      const base: Lead = existing
+        ? { ...s.leads.find((l) => l.id === leadId)!, lastCustomerMsgAt: now }
+        : { id: leadId, phone, source, campaign: meta.campaign ?? (source === "Meta Ads" ? "CTWA - Simulator" : undefined), inQueue: false, aiActive: true, createdAt: now, lastCustomerMsgAt: now, ...meta };
+      const lead: Lead = { ...base, resolved: false, unread: (base.unread ?? 0) + 1, typing: base.aiActive };
+      const leads = existing ? s.leads.map((l) => (l.id === leadId ? lead : l)) : [...s.leads, lead];
+      return { ...s, leads, messages: [...s.messages, { id: uid(), leadId, from: "customer", text, at: now }] };
+    });
+
+    // Tahap 2: balasan bot setelah jeda.
+    setTimeout(() => setState((s) => {
+      let lead = s.leads.find((l) => l.id === leadId);
+      if (!lead || !lead.aiActive) return lead ? { ...s, leads: s.leads.map((l) => (l.id === leadId ? { ...l, typing: false } : l)) } : s;
+      const t = botTurn({ lead, text, bot: s.bot, knowledge: s.knowledge, cities: s.users.flatMap((u) => u.cities), isFirst });
+      lead = { ...lead, typing: false, name: lead.name ?? t.name, city: lead.city ?? t.city, unit: lead.unit ?? t.unit };
+      const at = Date.now();
+      const warm = statusOf(lead) === "WARM";
+      const reply = warm ? [t.knowledge ? t.reply : "", fill(s.bot.handover, lead)].filter(Boolean).join("\n\n") : t.reply;
+      const msgs: Message[] = [{ id: uid(), leadId, from: "ai", text: reply, at, knowledge: t.knowledge, sources: t.sources, status: "delivered" }];
       let audit = s.audit;
-
-      if (lead.aiActive) {
-        const allCities = s.users.flatMap((u) => u.cities);
-        const kb = matchKnowledge(text, s.knowledge);
-        // Jawaban singkat hanya dianggap jawaban pertanyaan terakhir jika bukan pertanyaan pelanggan.
-        const expecting = existing && !kb && !text.includes("?") ? expectingField(lead) : undefined;
-        const ex = extractFields(text, allCities, s.bot.units, expecting);
-        lead = { ...lead, name: lead.name ?? ex.name, city: lead.city ?? ex.city, unit: lead.unit ?? ex.unit };
-        const parts = [!existing ? s.bot.greeting : "", kb?.answer ?? "", nextQuestion(lead, s.bot)].filter(Boolean);
-        msgs.push({ id: uid(), leadId, from: "ai", text: parts.join("\n\n"), at: now + 1, knowledge: kb?.title });
-
-        if (statusOf(lead) === "WARM") {
-          lead.aiActive = false;
-          msgs.push({ id: uid(), leadId, from: "system", text: "Data lengkap → WARM. AI handover, balasan otomatis dihentikan.", at: now + 2 });
-          const r = routeLead(lead.city, s.users);
-          if (r.kind === "assigned") {
-            lead = { ...lead, agentId: r.agent.id, assignedAt: now };
-            msgs.push({ id: uid(), leadId, from: "system", text: `Auto-assign ke ${r.agent.name} (${r.agent.territory}) — domisili "${lead.city}"`, at: now + 3 });
-            audit = [{ id: uid(), at: now, actor: "Sistem", action: "Auto assignment", target: leadId, detail: `${r.agent.name} (${r.agent.territory})` }, ...audit];
-          } else {
-            lead = { ...lead, inQueue: true, queueReason: r.reason };
-            msgs.push({ id: uid(), leadId, from: "system", text: `Masuk Admin Queue: ${r.reason}`, at: now + 3 });
-            audit = [{ id: uid(), at: now, actor: "Sistem", action: "Masuk Admin Queue", target: leadId, detail: r.reason }, ...audit];
-          }
+      if (warm) {
+        lead.aiActive = false;
+        msgs.push({ id: uid(), leadId, from: "system", text: "Data lengkap → WARM. AI handover, balasan otomatis dihentikan.", at: at + 1 });
+        const r = routeLead(lead.city, s.users);
+        if (r.kind === "assigned") {
+          lead = { ...lead, agentId: r.agent.id, assignedAt: at };
+          msgs.push({ id: uid(), leadId, from: "system", text: `Auto-assign ke ${r.agent.name} (${r.agent.territory}) — domisili "${lead.city}"`, at: at + 2 });
+          audit = [{ id: uid(), at, actor: "Sistem", action: "Auto assignment", target: leadId, detail: `${r.agent.name} (${r.agent.territory})` }, ...audit];
+        } else {
+          lead = { ...lead, inQueue: true, queueReason: r.reason };
+          msgs.push({ id: uid(), leadId, from: "system", text: `Masuk Admin Queue: ${r.reason}`, at: at + 2 });
+          audit = [{ id: uid(), at, actor: "Sistem", action: "Masuk Admin Queue", target: leadId, detail: r.reason }, ...audit];
         }
       }
-      const leads = existing ? s.leads.map((l) => (l.id === leadId ? lead : l)) : [...s.leads, lead];
-      return { ...s, leads, messages: [...s.messages, ...msgs], audit };
-    });
+      const final = lead;
+      return { ...s, leads: s.leads.map((l) => (l.id === leadId ? final : l)), messages: [...s.messages, ...msgs], audit };
+    }), delay);
     return leadId;
   };
+
+  const demo_setAi = (leadId: string, on: boolean) => setState((s) => ({
+    ...s,
+    leads: s.leads.map((l) => (l.id === leadId ? { ...l, aiActive: on } : l)),
+    messages: [...s.messages, { id: uid(), leadId, from: "system", text: on ? `Bot diaktifkan kembali oleh ${actor}` : `Human takeover: ${actor} mengambil alih percakapan, bot berhenti`, at: Date.now() }],
+    audit: log(s, on ? "Aktifkan bot" : "Human takeover", leadId),
+  }));
+  const demo_setResolved = (leadId: string, v: boolean) => setState((s) => ({
+    ...s,
+    leads: s.leads.map((l) => (l.id === leadId ? { ...l, resolved: v } : l)),
+    messages: [...s.messages, { id: uid(), leadId, from: "system", text: v ? `Percakapan ditandai selesai oleh ${actor}` : `Percakapan dibuka kembali oleh ${actor}`, at: Date.now() }],
+  }));
+  const markRead = (leadId: string) => setState((s) => (s.leads.find((l) => l.id === leadId)?.unread ? { ...s, leads: s.leads.map((l) => (l.id === leadId ? { ...l, unread: 0 } : l)) } : s));
 
   const value: Store = {
     ...state, leads, ready, live, refresh, user, agents, visibleLeads, userById, messagesFor,
@@ -279,8 +304,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     saveKnowledge: (item) => { if (live) void rpc("saveKnowledge", { item }); else demo_saveKnowledge(item); },
     deleteKnowledge: (id) => { if (live) void rpc("deleteKnowledge", { id }); else demo_deleteKnowledge(id); },
     updateBot: (patch) => { if (live) void rpc("updateBot", { patch }); else demo_updateBot(patch); },
-    simulateInbound: async (phone, text, source) => {
-      if (!live) return demo_simulateInbound(phone, text, source);
+    setAi: (leadId, on) => { if (live) void rpc("setAi", { leadId, on }); else demo_setAi(leadId, on); },
+    setResolved: (leadId, v) => { if (live) void rpc("setResolved", { leadId, v }); else demo_setResolved(leadId, v); },
+    markRead,
+    simulateInbound: async (phone, text, source, meta) => {
+      if (!live) return demo_simulateInbound(phone, text, source, meta);
       const r = await rpc("simulate", { phone, text, source });
       return (r.data?.leadId as string) ?? "";
     },

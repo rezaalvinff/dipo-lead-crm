@@ -32,6 +32,16 @@ export interface Lead {
   adId?: string;
   /** Click id CTWA, dipakai untuk Conversions API. */
   ctwaClid?: string;
+  /** Nama profil WhatsApp (contacts[0].profile.name). */
+  profileName?: string;
+  /** Headline & URL iklan dari referral CTWA. */
+  adHeadline?: string;
+  sourceUrl?: string;
+  /** Percakapan sudah ditandai selesai oleh CS. */
+  resolved?: boolean;
+  /** Demo: jumlah pesan belum dibaca & indikator AI mengetik. */
+  unread?: number;
+  typing?: boolean;
   /** Status pengiriman event ke Meta CAPI. */
   capiStatus?: "sent" | "failed";
   /** User id agent yang menangani. */
@@ -59,6 +69,8 @@ export interface Message {
   template?: boolean;
   /** Judul knowledge yang dipakai AI untuk menjawab (jika ada). */
   knowledge?: string;
+  /** Chunk konteks hasil retrieval (RAG) yang dipakai AI. */
+  sources?: { title: string; index: number; score: number }[];
 }
 
 export interface AuditEntry {
@@ -74,10 +86,13 @@ export interface KnowledgeItem {
   id: string;
   title: string;
   category: string;
-  /** Kata kunci pemicu (lowercase). */
+  /** Kata kunci tambahan (opsional) untuk membantu pencarian. */
   keywords: string[];
+  /** Isi dokumen / FAQ / SOP. Dipotong menjadi chunk untuk RAG. */
   answer: string;
   active: boolean;
+  /** Nama file asal jika di-upload. */
+  fileName?: string;
 }
 
 export interface BotSettings {

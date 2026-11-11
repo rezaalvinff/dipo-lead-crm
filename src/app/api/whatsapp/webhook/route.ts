@@ -29,9 +29,9 @@ function textOf(m: WaMessage) {
   return `[${m.type}]`;
 }
 
-function sourceOf(m: WaMessage): { source: LeadSource; campaign?: string; adId?: string; ctwaClid?: string } {
+function sourceOf(m: WaMessage): { source: LeadSource; campaign?: string; adHeadline?: string; sourceUrl?: string; adId?: string; ctwaClid?: string } {
   const r = m.referral;
-  if (r?.ctwa_clid || r?.source_type === "ad") return { source: "Meta Ads", campaign: r.headline, adId: r.source_id, ctwaClid: r.ctwa_clid };
+  if (r?.ctwa_clid || r?.source_type === "ad") return { source: "Meta Ads", campaign: r.headline, adHeadline: r.headline, sourceUrl: r.source_url, adId: r.source_id, ctwaClid: r.ctwa_clid };
   // Link wa.me dari Google memakai teks prefilled/UTM; tanpa bukti tetap "WhatsApp Organic".
   const t = textOf(m).toLowerCase();
   if (/\[gads\]|utm_source=google&utm_medium=cpc/.test(t)) return { source: "Google Ads" };

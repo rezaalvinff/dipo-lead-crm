@@ -2,7 +2,7 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { z } from "zod";
-import { expectingField, extractFields, matchKnowledge, nextQuestion } from "../ai";
+import { botTurn } from "../ai";
 import type { BotSettings, KnowledgeItem, Lead, Message } from "../types";
 
 export const aiConfigured = () => Boolean(process.env.ANTHROPIC_API_KEY);
@@ -33,12 +33,8 @@ export async function qualify(ctx: Ctx): Promise<AiTurn> {
 }
 
 function mockTurn({ lead, text, bot, knowledge, cities, isFirst }: Ctx): AiTurn {
-  const kb = matchKnowledge(text, knowledge);
-  const expecting = !isFirst && !kb && !text.includes("?") ? expectingField(lead) : undefined;
-  const ex = extractFields(text, cities, bot.units, expecting);
-  const merged = { ...lead, name: lead.name ?? ex.name, city: lead.city ?? ex.city, unit: lead.unit ?? ex.unit };
-  const reply = [isFirst ? bot.greeting : "", kb?.answer ?? "", nextQuestion(merged, bot)].filter(Boolean).join("\n\n");
-  return { name: ex.name, city: ex.city, unit: ex.unit, reply, knowledge: kb?.title };
+  const t = botTurn({ lead, text, bot, knowledge, cities, isFirst });
+  return { name: t.name, city: t.city, unit: t.unit, reply: t.reply, knowledge: t.knowledge };
 }
 
 let client: Anthropic | null = null;

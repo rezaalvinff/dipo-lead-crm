@@ -8,7 +8,8 @@ Aplikasi punya dua mode:
 - **Demo** (default, tanpa env var): data dummy di `localStorage` browser — untuk melihat tampilan.
 - **Live** (setelah `DATABASE_URL` dll. di-set): database Postgres, login sungguhan, chatbot WhatsApp
   dengan AI Claude, auto-assign agent, sync hasil Meta Ads, dan Conversions API.
-  Lihat **[SETUP.md](SETUP.md)** untuk langkah lengkapnya.
+  Lihat **[SETUP.md](SETUP.md)** untuk langkah lengkapnya, dan
+  **[docs/KEBUTUHAN-DAN-BIAYA.md](docs/KEBUTUHAN-DAN-BIAYA.md)** untuk daftar kebutuhan & estimasi biaya.
 
 ## Login demo (mode demo saja)
 
@@ -30,11 +31,11 @@ Aplikasi punya dua mode:
 | Menu | Role | Isi |
 |---|---|---|
 | Dashboard | Admin | KPI COLD/WARM/Admin Queue, leads per agent, sumber leads |
-| Inbox | Admin, Agent | Chat, balas pesan, aturan 24 jam + template, human takeover |
+| Inbox | Admin, Agent | Live chat ala Qiscus: tab Bot/Antrean/Ditangani/Selesai, ambil alih / aktifkan bot, sumber konteks RAG, atribusi & payload webhook, aturan 24 jam + template |
 | Leads | Admin, Agent | Tabel leads + filter + export CSV |
 | Admin Queue | Admin | Lengkapi data & assign agent |
 | Kelola Agent | Admin | Tambah/edit/hapus user, role akses, nama wilayah, daftar domisili, uji auto-assign |
-| Knowledge Chatbot | Admin | Knowledge base (kata kunci → jawaban), persona, sapaan, pertanyaan, pesan handover, daftar unit |
+| Knowledge Chatbot | Admin | Knowledge base RAG (upload dokumen FAQ/SOP, chunk, uji retrieval), persona, sapaan, pertanyaan, pesan handover, daftar unit |
 | Simulator | Admin | Chat sebagai pelanggan untuk menguji AI + knowledge + auto-assign |
 | Integrasi | Admin | Status WhatsApp & AI, callback webhook, login Facebook, hasil iklan, log Conversions API |
 | Laporan, Audit Log | Admin | — |

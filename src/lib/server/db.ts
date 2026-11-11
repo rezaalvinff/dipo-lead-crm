@@ -48,6 +48,10 @@ create table if not exists leads (
   capi_status text,
   capi_sent_at double precision
 );
+alter table leads add column if not exists resolved boolean not null default false;
+alter table leads add column if not exists profile_name text;
+alter table leads add column if not exists ad_headline text;
+alter table leads add column if not exists source_url text;
 create table if not exists messages (
   id text primary key,
   lead_id text not null references leads(id) on delete cascade,

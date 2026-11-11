@@ -58,3 +58,28 @@ export function nextQuestion(lead: Lead, s: BotSettings): string {
   if (!lead.unit) return fill(s.askUnit, lead);
   return fill(s.handover, lead);
 }
+
+import { answerFrom, looksLikeQuestion, retrieve } from "./rag";
+import type { Message } from "./types";
+
+export interface BotTurn { name?: string; city?: string; unit?: string; reply: string; knowledge?: string; sources?: Message["sources"] }
+
+/**
+ * Satu giliran bot (mock LLM): RAG retrieval untuk menjawab pertanyaan,
+ * ekstraksi nama/domisili/unit, lalu pertanyaan kualifikasi berikutnya.
+ */
+export function botTurn(p: { lead: Lead; text: string; bot: BotSettings; knowledge: KnowledgeItem[]; cities: string[]; isFirst: boolean }): BotTurn {
+  const hits = looksLikeQuestion(p.text) ? retrieve(p.text, p.knowledge) : [];
+  const answer = answerFrom(hits, p.text);
+  const expecting = !p.isFirst && !answer && !p.text.includes("?") ? expectingField(p.lead) : undefined;
+  const ex = extractFields(p.text, p.cities, p.bot.units, expecting);
+  // Pertanyaan tentang unit (mis. "bedanya Xpander sama Xpander Cross?") belum tentu berarti minat.
+  if (answer && p.text.includes("?")) delete ex.unit;
+  const merged = { ...p.lead, name: p.lead.name ?? ex.name, city: p.lead.city ?? ex.city, unit: p.lead.unit ?? ex.unit };
+  const reply = [p.isFirst ? p.bot.greeting : "", answer ?? "", statusOf(merged) === "WARM" ? "" : nextQuestion(merged, p.bot)].filter(Boolean).join("\n\n");
+  return {
+    ...ex, reply,
+    knowledge: answer ? hits[0].title : undefined,
+    sources: answer ? hits.map((h) => ({ title: h.title, index: h.index, score: Math.round(h.score * 100) / 100 })) : undefined,
+  };
+}

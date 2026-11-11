@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { ROLE_LABEL } from "@/lib/permissions";
+import { RealtimeEngine, Toasts, useRealtimeDemo } from "@/components/Realtime";
 
 /** agent: true = menu juga tersedia untuk role Agent. Selain itu khusus Admin. */
 const NAV: { href: string; label: string; icon: React.ElementType; agent?: boolean }[] = [
@@ -29,6 +30,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const path = usePathname();
   const [open, setOpen] = useState(false);
+  const rt = useRealtimeDemo();
 
   const allowed = user?.role === "admin" || NAV.some((n) => n.agent && path.startsWith(n.href));
   useEffect(() => {
@@ -81,6 +83,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-slate-200 bg-white/90 px-4 backdrop-blur">
           <button className="lg:hidden" onClick={() => setOpen(true)} aria-label="Buka menu"><Menu size={20} /></button>
           {!live && <span className="hidden rounded-md bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 sm:inline">MODE DEMO · data dummy</span>}
+          <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700" title={live ? "Pembaruan data otomatis" : "Simulasi koneksi WebSocket"}><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" /></span>Realtime</span>
+          {!live && (
+            <button onClick={rt.toggle} className={`hidden rounded-full px-2.5 py-0.5 text-xs font-medium md:inline ${rt.on ? "bg-slate-800 text-white" : "bg-slate-100 text-slate-600"}`} title="Pelanggan dummy mengirim chat otomatis setiap ±14 detik">
+              Chat masuk otomatis: {rt.on ? "ON" : "OFF"}
+            </button>
+          )}
           <div className="ml-auto flex items-center gap-3">
             <div className="text-right leading-tight">
               <div className="text-sm font-semibold">{user.name}</div>
@@ -90,6 +98,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
         <main className="mx-auto w-full max-w-7xl flex-1 p-4 sm:p-6">{children}</main>
+        <RealtimeEngine on={rt.on} />
+        <Toasts />
       </div>
     </div>
   );
